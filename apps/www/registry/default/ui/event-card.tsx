@@ -1,6 +1,6 @@
-import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/registry/default/lib/utils'
+import { type VariantProps, cva } from 'class-variance-authority'
+import * as React from 'react'
 
 export const EVENT_COLORS = ['gray', 'blue', 'pink', 'green', 'purple', 'amber'] as const
 export type EventColor = (typeof EVENT_COLORS)[number]
@@ -14,7 +14,8 @@ const containerVariants = cva(
         blue: 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-600/15 dark:hover:bg-blue-600/20',
         pink: 'bg-pink-50 hover:bg-pink-100 dark:bg-pink-600/15 dark:hover:bg-pink-600/20',
         green: 'bg-green-50 hover:bg-green-100 dark:bg-green-600/15 dark:hover:bg-green-600/20',
-        purple: 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-600/15 dark:hover:bg-purple-600/20',
+        purple:
+          'bg-purple-50 hover:bg-purple-100 dark:bg-purple-600/15 dark:hover:bg-purple-600/20',
         amber: 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-600/15 dark:hover:bg-amber-600/20',
       },
     },
@@ -49,12 +50,7 @@ interface EventCardRootProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'color'>,
     VariantProps<typeof containerVariants> {}
 
-function EventCardRoot({
-  className,
-  color = 'gray',
-  children,
-  ...props
-}: EventCardRootProps) {
+function EventCardRoot({ className, color = 'gray', children, ...props }: EventCardRootProps) {
   return (
     <ColorContext.Provider value={color ?? 'gray'}>
       <div className={cn(containerVariants({ color }), className)} {...props}>
@@ -64,16 +60,10 @@ function EventCardRoot({
   )
 }
 
-function EventCardTitle({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLParagraphElement>) {
+function EventCardTitle({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   const color = React.useContext(ColorContext)
   return (
-    <p
-      className={cn('order-1 font-semibold', titleColorClasses[color], className)}
-      {...props}
-    />
+    <p className={cn('order-1 font-semibold', titleColorClasses[color], className)} {...props} />
   )
 }
 
