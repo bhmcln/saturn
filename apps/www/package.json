@@ -1,0 +1,15 @@
+{
+  "name": "@saturn/www",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@saturn/registry-schema": "workspace:*"
+  }
+}

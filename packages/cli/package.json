@@ -1,0 +1,19 @@
+{
+  "name": "saturn",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CLI for adding Saturn time-based UI components to your project",
+  "type": "module",
+  "bin": {
+    "saturn": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@saturn/registry-schema": "workspace:*"
+  }
+}
