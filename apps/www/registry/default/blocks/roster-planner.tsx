@@ -4,7 +4,6 @@ import { format, isSameDay } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
-import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
 import { type WeekStartsOn, addDays, getWeekDays } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
@@ -59,10 +58,12 @@ export interface RosterPlannerProps extends React.HTMLAttributes<HTMLDivElement>
   onShiftClick?: (shift: RosterShift) => void
   onTaskClick?: (task: RosterUnallocatedTask) => void
   /**
-   * Called when a shift is dragged vertically to a new time within the same
-   * day cell. Receives the updated start and end. Pass to enable drag.
+   * Called when a shift is dragged to a new position. The target carries the
+   * new worker (may be the same), and the new start + end. Pass to enable
+   * drag — supports vertical (time), horizontal (day), and cross-row
+   * (worker reassignment) drag in one gesture, all snapped to 15 minutes.
    */
-  onShiftMove?: (shift: RosterShift, newStart: Date, newEnd: Date) => void
+  onShiftMove?: (shift: RosterShift, target: { workerId: string; start: Date; end: Date }) => void
   /**
    * Called when a shift is resized from its top or bottom edge. Pass to enable
    * the resize handles.
@@ -132,10 +133,12 @@ export function RosterPlanner({
 
       <div className="flex flex-auto flex-col overflow-auto">
         <DayLabels days={weekDays} gutterWidth={labelWidth} className="border-b" />
-        {workers.map((worker) => (
+        {workers.map((worker, workerIndex) => (
           <WorkerRow
             key={worker.id}
             worker={worker}
+            workerIndex={workerIndex}
+            workers={workers}
             shifts={shiftsByWorker.get(worker.id) ?? []}
             days={weekDays}
             cellTimeRange={cellTimeRange}
@@ -205,17 +208,21 @@ function NavGroup({
 
 interface WorkerRowProps {
   worker: RosterWorker
+  workerIndex: number
+  workers: RosterWorker[]
   shifts: RosterShift[]
   days: Date[]
   cellTimeRange: [number, number]
   labelWidth: string
   onShiftClick?: (shift: RosterShift) => void
-  onShiftMove?: (shift: RosterShift, newStart: Date, newEnd: Date) => void
+  onShiftMove?: (shift: RosterShift, target: { workerId: string; start: Date; end: Date }) => void
   onShiftResize?: (shift: RosterShift, newStart: Date, newEnd: Date) => void
 }
 
 function WorkerRow({
   worker,
+  workerIndex,
+  workers,
   shifts,
   days,
   cellTimeRange,
@@ -236,9 +243,13 @@ function WorkerRow({
           {worker.meta && <p className="truncate text-xs text-muted-foreground">{worker.meta}</p>}
         </div>
       </div>
-      {days.map((day) => (
+      {days.map((day, dayIndex) => (
         <DayCell
           key={day.toISOString()}
+          dayIndex={dayIndex}
+          days={days}
+          workerIndex={workerIndex}
+          workers={workers}
           shifts={shifts.filter((s) => isSameDay(s.start, day))}
           cellTimeRange={cellTimeRange}
           onShiftClick={onShiftClick}
@@ -261,14 +272,22 @@ function Avatar({ worker }: { worker: RosterWorker }) {
 }
 
 interface DayCellProps {
+  dayIndex: number
+  days: Date[]
+  workerIndex: number
+  workers: RosterWorker[]
   shifts: RosterShift[]
   cellTimeRange: [number, number]
   onShiftClick?: (shift: RosterShift) => void
-  onShiftMove?: (shift: RosterShift, newStart: Date, newEnd: Date) => void
+  onShiftMove?: (shift: RosterShift, target: { workerId: string; start: Date; end: Date }) => void
   onShiftResize?: (shift: RosterShift, newStart: Date, newEnd: Date) => void
 }
 
 function DayCell({
+  dayIndex,
+  days,
+  workerIndex,
+  workers,
   shifts,
   cellTimeRange,
   onShiftClick,
@@ -284,6 +303,10 @@ function DayCell({
           shift={shift}
           cellRef={cellRef}
           cellTimeRange={cellTimeRange}
+          workerIndex={workerIndex}
+          workers={workers}
+          dayIndex={dayIndex}
+          days={days}
           onShiftClick={onShiftClick}
           onShiftMove={onShiftMove}
           onShiftResize={onShiftResize}
@@ -297,15 +320,33 @@ interface ShiftProps {
   shift: RosterShift
   cellRef: React.RefObject<HTMLDivElement | null>
   cellTimeRange: [number, number]
+  workerIndex: number
+  workers: RosterWorker[]
+  dayIndex: number
+  days: Date[]
   onShiftClick?: (shift: RosterShift) => void
-  onShiftMove?: (shift: RosterShift, newStart: Date, newEnd: Date) => void
+  onShiftMove?: (shift: RosterShift, target: { workerId: string; start: Date; end: Date }) => void
   onShiftResize?: (shift: RosterShift, newStart: Date, newEnd: Date) => void
 }
+
+interface DragSnap {
+  workerDelta: number
+  dayDelta: number
+  timeMs: number
+}
+
+const SNAP_MS = 15 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
+const DRAG_THRESHOLD_PX = 4
 
 function Shift({
   shift,
   cellRef,
   cellTimeRange,
+  workerIndex,
+  workers,
+  dayIndex,
+  days,
   onShiftClick,
   onShiftMove,
   onShiftResize,
@@ -321,9 +362,18 @@ function Shift({
     [startHour, cellMinutes],
   )
 
-  const [moveDelta, setMoveDelta] = React.useState(0)
+  const [drag, setDrag] = React.useState<DragSnap | null>(null)
   const [resizeStartDelta, setResizeStartDelta] = React.useState(0)
   const [resizeEndDelta, setResizeEndDelta] = React.useState(0)
+
+  const dragGeomRef = React.useRef<{
+    x: number
+    y: number
+    cellWidth: number
+    cellHeight: number
+    msPerPx: number
+  } | null>(null)
+  const isDraggingRef = React.useRef(false)
 
   const dyToMs = React.useCallback(
     (dy: number): number => {
@@ -336,21 +386,87 @@ function Shift({
     [cellRef, cellMinutes],
   )
 
-  const move = useEventDrag({
-    disabled: !onShiftMove,
-    snapMinutes: 15,
-    getDelta: (_dx, dy) => dyToMs(dy),
-    onDrag: setMoveDelta,
-    onMove(delta) {
-      setMoveDelta(0)
-      if (!onShiftMove) return
-      onShiftMove(
-        shift,
-        new Date(shift.start.getTime() + delta),
-        new Date(shift.end.getTime() + delta),
+  const computeSnap = React.useCallback(
+    (clientX: number, clientY: number): DragSnap | null => {
+      const geom = dragGeomRef.current
+      if (!geom) return null
+      const dx = clientX - geom.x
+      const dy = clientY - geom.y
+
+      const workerDeltaRaw = Math.round(dy / geom.cellHeight)
+      const workerDelta = Math.max(
+        -workerIndex,
+        Math.min(workers.length - 1 - workerIndex, workerDeltaRaw),
       )
+      const remainingDy = dy - workerDelta * geom.cellHeight
+      const timeMs = Math.round((remainingDy * geom.msPerPx) / SNAP_MS) * SNAP_MS
+
+      const dayDeltaRaw = Math.round(dx / geom.cellWidth)
+      const dayDelta = Math.max(-dayIndex, Math.min(days.length - 1 - dayIndex, dayDeltaRaw))
+
+      return { workerDelta, dayDelta, timeMs }
     },
-  })
+    [workerIndex, workers.length, dayIndex, days.length],
+  )
+
+  const handleMovePointerDown = (event: React.PointerEvent<HTMLElement>) => {
+    if (!onShiftMove) return
+    if (event.button !== 0) return
+    const cell = cellRef.current
+    if (!cell) return
+    const rect = cell.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return
+    dragGeomRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      cellWidth: rect.width,
+      cellHeight: rect.height,
+      msPerPx: (cellMinutes * 60 * 1000) / rect.height,
+    }
+    isDraggingRef.current = false
+  }
+
+  React.useEffect(() => {
+    if (!onShiftMove) return
+
+    const onPointerMove = (event: PointerEvent) => {
+      const geom = dragGeomRef.current
+      if (!geom) return
+      const dx = event.clientX - geom.x
+      const dy = event.clientY - geom.y
+      if (!isDraggingRef.current && Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return
+      isDraggingRef.current = true
+      const snap = computeSnap(event.clientX, event.clientY)
+      if (snap) setDrag(snap)
+    }
+
+    const commit = (event: PointerEvent) => {
+      const geom = dragGeomRef.current
+      if (!geom) return
+      const wasDragging = isDraggingRef.current
+      const snap = computeSnap(event.clientX, event.clientY)
+      dragGeomRef.current = null
+      isDraggingRef.current = false
+      setDrag(null)
+      if (!wasDragging || !snap) return
+      if (snap.workerDelta === 0 && snap.dayDelta === 0 && snap.timeMs === 0) return
+      const dayOffsetMs = snap.dayDelta * DAY_MS
+      const newStart = new Date(shift.start.getTime() + dayOffsetMs + snap.timeMs)
+      const newEnd = new Date(shift.end.getTime() + dayOffsetMs + snap.timeMs)
+      const newWorker = workers[workerIndex + snap.workerDelta]
+      if (!newWorker) return
+      onShiftMove(shift, { workerId: newWorker.id, start: newStart, end: newEnd })
+    }
+
+    document.addEventListener('pointermove', onPointerMove)
+    document.addEventListener('pointerup', commit)
+    document.addEventListener('pointercancel', commit)
+    return () => {
+      document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', commit)
+      document.removeEventListener('pointercancel', commit)
+    }
+  }, [onShiftMove, computeSnap, shift, workerIndex, workers])
 
   const resizeTop = useEventResize({
     edge: 'top',
@@ -380,13 +496,22 @@ function Shift({
     },
   })
 
-  const renderedStart = new Date(shift.start.getTime() + moveDelta + resizeStartDelta)
-  const renderedEnd = new Date(shift.end.getTime() + moveDelta + resizeEndDelta)
-  const top = Math.max(0, timeToPct(renderedStart))
-  const bottom = Math.min(100, timeToPct(renderedEnd))
+  const inCellStart = new Date(shift.start.getTime() + (drag?.timeMs ?? 0) + resizeStartDelta)
+  const inCellEnd = new Date(shift.end.getTime() + (drag?.timeMs ?? 0) + resizeEndDelta)
+  const top = Math.max(0, timeToPct(inCellStart))
+  const bottom = Math.min(100, timeToPct(inCellEnd))
   const height = Math.max(6, bottom - top)
 
-  const isActive = move.isDragging || resizeTop.isResizing || resizeBottom.isResizing
+  const dayOffsetMs = (drag?.dayDelta ?? 0) * DAY_MS
+  const finalStart = new Date(inCellStart.getTime() + dayOffsetMs)
+  const finalEnd = new Date(inCellEnd.getTime() + dayOffsetMs)
+
+  const geom = dragGeomRef.current
+  const translateX = drag && geom ? drag.dayDelta * geom.cellWidth : 0
+  const translateY = drag && geom ? drag.workerDelta * geom.cellHeight : 0
+
+  const isMoving = drag !== null
+  const isActive = isMoving || resizeTop.isResizing || resizeBottom.isResizing
 
   const stopResizePropagation =
     (handler: (event: React.PointerEvent<HTMLElement>) => void) =>
@@ -399,33 +524,51 @@ function Shift({
     <Tooltip open={isActive ? false : undefined}>
       <TooltipTrigger asChild>
         <div
-          style={{ top: `${top}%`, height: `${height}%` }}
-          className={cn('absolute right-1 left-1', isActive && 'z-20')}
+          style={{
+            top: `${top}%`,
+            height: `${height}%`,
+            transform:
+              translateX !== 0 || translateY !== 0
+                ? `translate(${translateX}px, ${translateY}px)`
+                : undefined,
+          }}
+          className={cn(
+            'absolute right-1 left-1',
+            isActive && 'z-50',
+            isMoving && 'transition-none',
+          )}
         >
           <ShiftBlock
             segments={shift.activities ?? []}
             onClick={() => {
               if (!isActive) onShiftClick?.(shift)
             }}
+            onPointerDown={handleMovePointerDown}
             className={cn(
+              'touch-none select-none',
               onShiftMove ? 'cursor-grab' : onShiftClick && 'cursor-pointer',
               isActive && 'cursor-grabbing shadow-lg ring-2 ring-primary/60',
             )}
-            {...move.handlers}
           >
             {onShiftResize && (
               <div
                 onPointerDown={stopResizePropagation(resizeTop.handlers.onPointerDown)}
-                className="absolute top-0 right-0 left-0 z-10 h-1.5 cursor-ns-resize touch-none"
-              />
+                className="group/handle absolute top-0 right-0 left-0 z-10 h-1.5 cursor-ns-resize touch-none"
+                aria-label="Resize shift start"
+              >
+                <div className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-foreground/40 opacity-0 transition-opacity group-hover/shift:opacity-100" />
+              </div>
             )}
-            <ShiftBlock.Title>{shift.title ?? format(renderedStart, 'h:mm a')}</ShiftBlock.Title>
+            <ShiftBlock.Title>{shift.title ?? format(finalStart, 'h:mm a')}</ShiftBlock.Title>
             {shift.meta && <ShiftBlock.Meta>{shift.meta}</ShiftBlock.Meta>}
             {onShiftResize && (
               <div
                 onPointerDown={stopResizePropagation(resizeBottom.handlers.onPointerDown)}
-                className="absolute right-0 bottom-0 left-0 z-10 h-1.5 cursor-ns-resize touch-none"
-              />
+                className="group/handle absolute right-0 bottom-0 left-0 z-10 h-1.5 cursor-ns-resize touch-none"
+                aria-label="Resize shift end"
+              >
+                <div className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-foreground/40 opacity-0 transition-opacity group-hover/shift:opacity-100" />
+              </div>
             )}
           </ShiftBlock>
         </div>
@@ -433,7 +576,7 @@ function Shift({
       <TooltipContent side="top">
         <p className="font-semibold">{shift.title ?? 'Shift'}</p>
         <p className="opacity-80">
-          {format(renderedStart, 'h:mm a')} – {format(renderedEnd, 'h:mm a')}
+          {format(finalStart, 'h:mm a')} – {format(finalEnd, 'h:mm a')}
         </p>
         {shift.meta && <p className="opacity-80">{shift.meta}</p>}
       </TooltipContent>

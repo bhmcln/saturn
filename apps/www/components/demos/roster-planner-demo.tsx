@@ -112,8 +112,8 @@ export function RosterPlannerDemo() {
     setShifts(buildShifts(next))
   }
 
-  const updateShift = (id: string, newStart: Date, newEnd: Date) => {
-    setShifts((prev) => prev.map((s) => (s.id === id ? { ...s, start: newStart, end: newEnd } : s)))
+  const updateShift = (id: string, patch: { workerId?: string; start: Date; end: Date }) => {
+    setShifts((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)))
   }
 
   return (
@@ -126,8 +126,8 @@ export function RosterPlannerDemo() {
       onWeekChange={handleWeekChange}
       onShiftClick={(s) => console.log('shift', s.id)}
       onTaskClick={(t) => console.log('task', t.id)}
-      onShiftMove={(s, start, end) => updateShift(s.id, start, end)}
-      onShiftResize={(s, start, end) => updateShift(s.id, start, end)}
+      onShiftMove={(s, target) => updateShift(s.id, target)}
+      onShiftResize={(s, start, end) => updateShift(s.id, { start, end })}
     />
   )
 }
