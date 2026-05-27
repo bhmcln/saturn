@@ -28,6 +28,7 @@ export async function initCommand(opts: InitOptions): Promise<void> {
     ui: string
     lib: string
     hooks: string
+    blocks: string
   }> = opts.yes
     ? {}
     : await prompts([
@@ -55,6 +56,12 @@ export async function initCommand(opts: InitOptions): Promise<void> {
           message: 'Hooks alias?',
           initial: '@/hooks',
         },
+        {
+          type: 'text',
+          name: 'blocks',
+          message: 'Blocks alias?',
+          initial: '@/components/blocks',
+        },
       ])
 
   const config = componentsConfigSchema.parse({
@@ -66,6 +73,7 @@ export async function initCommand(opts: InitOptions): Promise<void> {
       ui: answers.ui ?? '@/components/ui',
       lib: answers.lib ?? '@/lib',
       hooks: answers.hooks ?? '@/hooks',
+      blocks: answers.blocks ?? '@/components/blocks',
     },
   })
 

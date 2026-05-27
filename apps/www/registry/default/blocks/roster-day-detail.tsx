@@ -107,6 +107,7 @@ export function RosterDayDetail({
       </TimelineView.Header>
       <TimelineView.HourRuler />
       <TimelineView.Body>
+        {isSameDay(date, new Date()) && <TimelineView.NowIndicator />}
         {workers.map((worker) => (
           <ResourceRow
             key={worker.id}

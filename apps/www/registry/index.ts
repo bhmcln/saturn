@@ -301,7 +301,7 @@ export const registry: ManifestItem[] = [
     description: 'Horizontal-time × vertical-resource view — the rostering chassis',
     files: [{ path: 'ui/timeline-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns'],
-    registryDependencies: ['utils', 'use-time-grid'],
+    registryDependencies: ['utils', 'use-time-grid', 'use-now'],
   },
   {
     name: 'resource-row',

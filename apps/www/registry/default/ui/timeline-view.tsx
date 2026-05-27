@@ -1,5 +1,6 @@
 'use client'
 
+import { useNow } from '@/registry/default/hooks/use-now'
 import { type UseTimeGridReturn, useTimeGrid } from '@/registry/default/hooks/use-time-grid'
 import { cn } from '@/registry/default/lib/utils'
 import { eachHourOfInterval, format } from 'date-fns'
@@ -109,8 +110,40 @@ function Body({ className, children, ...props }: React.HTMLAttributes<HTMLDivEle
   )
 }
 
+export interface NowIndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Override "now" — useful for tests or static screenshots. */
+  date?: Date
+}
+
+/**
+ * Vertical "current time" line spanning all the rows in the timeline body.
+ * Renders nothing when `now` is outside the visible viewport. Place inside
+ * TimelineView.Body as a sibling to the resource rows.
+ */
+function NowIndicator({ date, className, style, ...props }: NowIndicatorProps) {
+  const { viewportStart, viewportEnd, viewportMs, labelWidth } = useTimeline()
+  const now = useNow()
+  const actual = date ?? now
+  if (actual < viewportStart || actual > viewportEnd) return null
+  const fraction = (actual.getTime() - viewportStart.getTime()) / viewportMs
+  return (
+    <div
+      role="presentation"
+      style={{
+        left: `calc(${labelWidth} + (100% - ${labelWidth}) * ${fraction})`,
+        ...style,
+      }}
+      className={cn('pointer-events-none absolute top-0 bottom-0 z-10 w-px bg-red-500', className)}
+      {...props}
+    >
+      <div className="absolute top-0 size-2 -translate-x-[3.5px] rounded-full bg-red-500" />
+    </div>
+  )
+}
+
 export const TimelineView = Object.assign(TimelineViewRoot, {
   Header,
   HourRuler,
   Body,
+  NowIndicator,
 })

@@ -1,8 +1,8 @@
 import { Announcement } from '@/components/announcement'
 import { CodeBlock } from '@/components/code-block'
-import { CalendarDemo } from '@/components/demos/calendar-demo'
+import { AppointmentCalendarDemo } from '@/components/demos/appointment-calendar-demo'
+import { RosterDayDetailDemo } from '@/components/demos/roster-day-detail-demo'
 import { RosterPlannerDemo } from '@/components/demos/roster-planner-demo'
-import { TimelineViewDemo } from '@/components/demos/timeline-view-demo'
 import {
   PageActions,
   PageHeader,
@@ -17,7 +17,7 @@ export default function HomePage() {
   return (
     <>
       <PageHeader>
-        <Announcement>v0.5 · Roster planner</Announcement>
+        <Announcement>v0.5 · Three flagship blocks</Announcement>
         <PageHeaderHeading>Time-based UI, the way you would have built it.</PageHeaderHeading>
         <PageHeaderDescription>
           A shadcn/ui-style library for rostering, scheduling, and time-based UI. Drag, resize, and
@@ -41,38 +41,32 @@ export default function HomePage() {
       </PageHeader>
 
       <section className="container space-y-10 py-10">
-        <div>
-          <h2 className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
-            Roster planner — a whole team's week at a glance
-          </h2>
-          <div className="overflow-hidden rounded-xl border bg-card">
-            <div className="h-[720px]">
-              <RosterPlannerDemo />
-            </div>
-          </div>
-        </div>
+        <BlockSection
+          tag="Roster planner"
+          label="Whole team's week — drag across days, drop on another worker"
+          height="h-[720px]"
+          href="/docs/roster-planner"
+        >
+          <RosterPlannerDemo />
+        </BlockSection>
 
-        <div>
-          <h2 className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
-            Calendar — one person's week
-          </h2>
-          <div className="overflow-hidden rounded-xl border bg-card">
-            <div className="h-[640px]">
-              <CalendarDemo />
-            </div>
-          </div>
-        </div>
+        <BlockSection
+          tag="Day detail"
+          label="One day across all workers — each row a horizontal timeline"
+          height="h-[640px]"
+          href="/docs/roster-day-detail"
+        >
+          <RosterDayDetailDemo />
+        </BlockSection>
 
-        <div>
-          <h2 className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
-            Timeline — many workers, one day
-          </h2>
-          <div className="overflow-hidden rounded-xl border bg-card">
-            <div className="h-[480px]">
-              <TimelineViewDemo />
-            </div>
-          </div>
-        </div>
+        <BlockSection
+          tag="Appointment calendar"
+          label="Personal scheduling — drag-to-create, edge resize, + New button"
+          height="h-[640px]"
+          href="/docs/appointment-calendar"
+        >
+          <AppointmentCalendarDemo />
+        </BlockSection>
       </section>
 
       <section className="container pb-20">
@@ -85,5 +79,39 @@ export default function HomePage() {
         </div>
       </section>
     </>
+  )
+}
+
+function BlockSection({
+  tag,
+  label,
+  height,
+  href,
+  children,
+}: {
+  tag: string
+  label: string
+  height: string
+  href: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <div className="mb-3 flex items-baseline gap-3">
+        <span className="rounded-md bg-foreground px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-background uppercase">
+          {tag}
+        </span>
+        <h2 className="text-sm text-muted-foreground">{label}</h2>
+        <Link
+          href={href}
+          className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground"
+        >
+          Docs →
+        </Link>
+      </div>
+      <div className="overflow-hidden rounded-xl border bg-card">
+        <div className={height}>{children}</div>
+      </div>
+    </div>
   )
 }

@@ -7,6 +7,7 @@ export const aliasesSchema = z.object({
   ui: z.string().default('@/components/ui'),
   lib: z.string().default('@/lib'),
   hooks: z.string().default('@/hooks'),
+  blocks: z.string().default('@/components/blocks'),
 })
 export type Aliases = z.infer<typeof aliasesSchema>
 
@@ -61,6 +62,7 @@ export function resolveTargetPath(filePath: string, aliases: Aliases): string {
     components: aliases.components,
     lib: aliases.lib,
     hooks: aliases.hooks,
+    blocks: aliases.blocks,
   }
   const alias = aliasMap[topDir]
   if (!alias) return filePath
