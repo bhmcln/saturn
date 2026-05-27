@@ -1,45 +1,59 @@
-import { ThemeToggle } from '@/components/theme-toggle'
+import { Announcement } from '@/components/announcement'
+import { buttonVariants } from '@/components/button'
+import { CodeBlock } from '@/components/code-block'
+import { WeekViewDemo } from '@/components/demos/week-view-demo'
+import {
+  PageActions,
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderHeading,
+} from '@/components/page-header'
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-16">
-      <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">Saturn</h1>
-        <ThemeToggle />
-      </header>
+    <>
+      <PageHeader>
+        <Announcement>Now in preview · week-view</Announcement>
+        <PageHeaderHeading>Time-based UI, the way you would have built it.</PageHeaderHeading>
+        <PageHeaderDescription>
+          A shadcn/ui-style library of day, week, and month views, scheduling, and rostering
+          primitives. Copy the source you need, own the code, theme it your way.
+        </PageHeaderDescription>
+        <PageActions>
+          <Link href="/docs/week-view" className={buttonVariants()}>
+            Browse components
+            <ArrowRight className="size-4" />
+          </Link>
+          <Link
+            href="https://github.com/hamish-mclean/saturn"
+            target="_blank"
+            rel="noreferrer"
+            className={buttonVariants({ variant: 'outline' })}
+          >
+            GitHub
+          </Link>
+        </PageActions>
+      </PageHeader>
 
-      <p className="mt-6 text-lg text-gray-600 dark:text-gray-400">
-        A shadcn/ui-style library of time-based UI components: day, week, and month views,
-        scheduling, rostering, shifts. Copy what you need into your project — own the code.
-      </p>
+      <section className="container py-10">
+        <div className="overflow-hidden rounded-xl border bg-card">
+          <div className="h-[560px]">
+            <WeekViewDemo />
+          </div>
+        </div>
+      </section>
 
-      <div className="mt-10">
-        <h2 className="text-lg font-semibold">Components</h2>
-        <ul className="mt-4 space-y-2">
-          <li>
-            <Link
-              href="/docs/week-view"
-              className="text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400"
-            >
-              week-view
-            </Link>
-            <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-              Seven-day calendar with positioned events
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      <div className="mt-10">
-        <h2 className="text-lg font-semibold">Install</h2>
-        <pre className="mt-4 rounded-md bg-gray-900 px-4 py-3 text-sm text-gray-100">
-          <code>npx saturn init</code>
-        </pre>
-        <pre className="mt-2 rounded-md bg-gray-900 px-4 py-3 text-sm text-gray-100">
-          <code>npx saturn add week-view</code>
-        </pre>
-      </div>
-    </main>
+      <section className="container pb-20">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          Install
+        </h2>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <CodeBlock>npx saturn init</CodeBlock>
+          <CodeBlock>npx saturn add week-view</CodeBlock>
+        </div>
+      </section>
+    </>
   )
 }

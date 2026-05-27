@@ -1,32 +1,36 @@
 'use client'
 
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+import * as React from 'react'
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
 
-  useEffect(() => setMounted(true), [])
-  if (!mounted) return <div className="size-9" aria-hidden />
+  React.useEffect(() => setMounted(true), [])
 
-  const cycle = () => {
-    if (theme === 'light') setTheme('dark')
-    else if (theme === 'dark') setTheme('system')
-    else setTheme('light')
-  }
-
-  const Icon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor
+  const toggle = React.useCallback(() => {
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
+  }, [resolvedTheme, setTheme])
 
   return (
     <button
       type="button"
-      onClick={cycle}
-      aria-label={`Theme: ${theme ?? 'system'}`}
-      className="inline-flex size-9 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+      onClick={toggle}
+      aria-label="Toggle theme"
+      className="relative inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
-      <Icon className="size-5" />
+      {mounted ? (
+        resolvedTheme === 'dark' ? (
+          <Moon className="size-4" />
+        ) : (
+          <Sun className="size-4" />
+        )
+      ) : (
+        <span className="size-4" aria-hidden />
+      )}
+      <span className="sr-only">Toggle theme</span>
     </button>
   )
 }
