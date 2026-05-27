@@ -33,3 +33,5 @@ result-*
 
 # Registry build output (kept gitignored; rebuilt from registry/ source)
 apps/www/public/r/
+
+.tmp/
