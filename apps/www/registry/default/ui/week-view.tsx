@@ -78,10 +78,7 @@ function WeekViewRoot({
 function Header({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
     <header
-      className={cn(
-        'flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-white/15 dark:bg-gray-800/50',
-        className,
-      )}
+      className={cn('flex flex-none items-center justify-between border-b px-6 py-4', className)}
       {...props}
     />
   )
@@ -90,10 +87,7 @@ function Header({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
 function Title({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   const { date } = useWeekView()
   return (
-    <h1
-      className={cn('text-base font-semibold text-gray-900 dark:text-white', className)}
-      {...props}
-    >
+    <h1 className={cn('text-base font-semibold text-foreground', className)} {...props}>
       <time dateTime={format(date, 'yyyy-MM')}>{format(date, 'MMMM yyyy')}</time>
     </h1>
   )
@@ -104,7 +98,7 @@ function Navigation({ className, ...props }: React.HTMLAttributes<HTMLDivElement
   return (
     <div
       className={cn(
-        'relative flex items-center rounded-md bg-white shadow-xs outline -outline-offset-1 outline-gray-300 md:items-stretch dark:bg-white/10 dark:shadow-none dark:outline-white/5',
+        'relative flex items-center rounded-md border bg-background shadow-xs md:items-stretch',
         className,
       )}
       {...props}
@@ -112,7 +106,7 @@ function Navigation({ className, ...props }: React.HTMLAttributes<HTMLDivElement
       <button
         type="button"
         onClick={() => onDateChange?.(addDays(date, -7))}
-        className="flex h-9 w-12 items-center justify-center rounded-l-md pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50 dark:hover:text-white dark:md:hover:bg-white/10"
+        className="flex h-9 w-12 items-center justify-center rounded-l-md pr-1 text-muted-foreground hover:text-foreground md:w-9 md:pr-0 md:hover:bg-accent"
       >
         <span className="sr-only">Previous week</span>
         <ChevronLeft aria-hidden="true" className="size-5" />
@@ -120,15 +114,15 @@ function Navigation({ className, ...props }: React.HTMLAttributes<HTMLDivElement
       <button
         type="button"
         onClick={() => onDateChange?.(new Date())}
-        className="hidden px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block dark:text-white dark:hover:bg-white/10"
+        className="hidden border-x px-3.5 text-sm font-semibold text-foreground hover:bg-accent md:block"
       >
         Today
       </button>
-      <span className="relative -mx-px h-5 w-px bg-gray-300 md:hidden dark:bg-white/10" />
+      <span className="relative -mx-px h-5 w-px bg-border md:hidden" />
       <button
         type="button"
         onClick={() => onDateChange?.(addDays(date, 7))}
-        className="flex h-9 w-12 items-center justify-center rounded-r-md pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50 dark:hover:text-white dark:md:hover:bg-white/10"
+        className="flex h-9 w-12 items-center justify-center rounded-r-md pl-1 text-muted-foreground hover:text-foreground md:w-9 md:pl-0 md:hover:bg-accent"
       >
         <span className="sr-only">Next week</span>
         <ChevronRight aria-hidden="true" className="size-5" />
@@ -140,14 +134,11 @@ function Navigation({ className, ...props }: React.HTMLAttributes<HTMLDivElement
 function Body({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'isolate flex flex-auto flex-col overflow-auto bg-white dark:bg-gray-900',
-        className,
-      )}
+      className={cn('isolate flex flex-auto flex-col overflow-auto bg-background', className)}
       {...props}
     >
       {/* Mobile horizontal-scroll: force inner width wider than viewport on tablet sizes. */}
-      <div className="flex max-w-full flex-none flex-col sm:max-w-none sm:w-[165%] md:w-full md:max-w-full">
+      <div className="flex max-w-full flex-none flex-col sm:w-[165%] sm:max-w-none md:w-full md:max-w-full">
         {children}
       </div>
     </div>
@@ -159,11 +150,11 @@ function DayLabels({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'sticky top-0 z-30 flex-none bg-white shadow-sm ring-1 ring-black/5 sm:pr-8 dark:bg-gray-900 dark:shadow-none dark:ring-white/20',
+        'sticky top-0 z-30 flex-none bg-background shadow-sm ring-1 ring-border sm:pr-8',
         className,
       )}
     >
-      <div className="-mr-px hidden grid-cols-7 divide-x divide-gray-100 border-r border-gray-100 text-sm/6 text-gray-500 sm:grid dark:divide-white/10 dark:border-white/10 dark:text-gray-400">
+      <div className="-mr-px hidden grid-cols-7 divide-x divide-border border-r text-sm/6 text-muted-foreground sm:grid">
         <div className="col-end-1 w-14" />
         {weekDays.map((day) => {
           const today = isToday(day)
@@ -174,8 +165,8 @@ function DayLabels({ className }: { className?: string }) {
                 <span
                   className={cn(
                     today
-                      ? 'ml-1.5 flex size-8 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white dark:bg-indigo-500'
-                      : 'items-center justify-center font-semibold text-gray-900 dark:text-white',
+                      ? 'ml-1.5 flex size-8 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground'
+                      : 'items-center justify-center font-semibold text-foreground',
                   )}
                 >
                   {format(day, 'd')}
@@ -205,18 +196,18 @@ function Grid({
 
   return (
     <div className={cn('flex flex-auto', className)}>
-      <div className="sticky left-0 z-10 w-14 flex-none bg-white ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-white/5" />
+      <div className="sticky left-0 z-10 w-14 flex-none bg-background ring-1 ring-border" />
       <div className="grid flex-auto grid-cols-1 grid-rows-1">
         {/* Horizontal hour lines */}
         <div
           style={{ gridTemplateRows: 'repeat(48, minmax(3.5rem, 1fr))' }}
-          className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100 dark:divide-white/5"
+          className="col-start-1 col-end-2 row-start-1 grid divide-y divide-border"
         >
           <div className="row-end-1 h-7" />
           {hours.map((hour) => (
             <React.Fragment key={hour.getHours()}>
               <div>
-                <div className="sticky left-0 z-20 -mt-2.5 -ml-14 w-14 pr-2 text-right text-xs/5 text-gray-400 dark:text-gray-500">
+                <div className="sticky left-0 z-20 -mt-2.5 -ml-14 w-14 pr-2 text-right text-xs/5 text-muted-foreground">
                   {formatHour(hour)}
                 </div>
               </div>
@@ -226,7 +217,7 @@ function Grid({
         </div>
 
         {/* Vertical day-column lines */}
-        <div className="col-start-1 col-end-2 row-start-1 hidden grid-rows-1 divide-x divide-gray-100 sm:grid sm:grid-cols-7 dark:divide-white/5">
+        <div className="col-start-1 col-end-2 row-start-1 hidden grid-rows-1 divide-x divide-border sm:grid sm:grid-cols-7">
           {weekDays.map((day, i) => (
             <div
               key={day.toISOString()}
@@ -270,7 +261,9 @@ function Events({ children }: EventsProps) {
               gridRow: `${rowStart} / span ${rowSpan}`,
               gridColumnStart: dayIndex + 1,
             }}
-            className="relative mt-px flex dark:before:pointer-events-none dark:before:absolute dark:before:inset-1 dark:before:z-0 dark:before:rounded-lg dark:before:bg-gray-900"
+            // The before pseudo provides an opaque mask under translucent event
+            // chips in dark mode, so per-event colors keep their intended weight.
+            className="relative mt-px flex dark:before:pointer-events-none dark:before:absolute dark:before:inset-1 dark:before:z-0 dark:before:rounded-lg dark:before:bg-background"
           >
             {children ? (
               children(event)
