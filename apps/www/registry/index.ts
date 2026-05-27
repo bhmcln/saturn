@@ -414,4 +414,13 @@ export const registry: ManifestItem[] = [
       'timeline-view',
     ],
   },
+  {
+    name: 'appointment-calendar',
+    type: 'registry:block',
+    description:
+      'Personal-calendar block over WeekView — drag to move, edge-resize, drag-to-create, plus a + New button',
+    files: [{ path: 'blocks/appointment-calendar.tsx', type: 'registry:block' }],
+    dependencies: ['lucide-react'],
+    registryDependencies: ['utils', 'time', 'button', 'event-card', 'week-view'],
+  },
 ]

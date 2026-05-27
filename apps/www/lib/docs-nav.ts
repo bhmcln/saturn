@@ -88,6 +88,7 @@ export const docsNav: DocsNavGroup[] = [
     items: [
       { title: 'Roster Planner', href: '/docs/roster-planner' },
       { title: 'Roster Day Detail', href: '/docs/roster-day-detail' },
+      { title: 'Appointment Calendar', href: '/docs/appointment-calendar' },
     ],
   },
 ]

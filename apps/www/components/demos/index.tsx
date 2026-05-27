@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { ActivityBlockDemo } from './activity-block-demo'
 import { AgendaViewDemo } from './agenda-view-demo'
+import { AppointmentCalendarDemo } from './appointment-calendar-demo'
 import { AvailabilityOverlayDemo } from './availability-overlay-demo'
 import { ButtonDemo } from './button-demo'
 import { DatePickerDemo } from './date-picker-demo'
@@ -134,6 +135,11 @@ export const DEMOS: Record<string, DemoSpec> = {
   'roster-day-detail': {
     element: <RosterDayDetailDemo />,
     filename: 'roster-day-detail-demo.tsx',
+    previewClassName: 'block h-[640px] p-0 min-h-0',
+  },
+  'appointment-calendar': {
+    element: <AppointmentCalendarDemo />,
+    filename: 'appointment-calendar-demo.tsx',
     previewClassName: 'block h-[640px] p-0 min-h-0',
   },
   'use-drag-to-create': {
