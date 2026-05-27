@@ -98,6 +98,12 @@ export const registry: ManifestItem[] = [
     files: [{ path: 'hooks/use-event-resize.ts', type: 'registry:hook' }],
     registryDependencies: ['use-event-drag'],
   },
+  {
+    name: 'use-drag-to-create',
+    type: 'registry:hook',
+    description: 'Pointer-down on empty grid + drag to define a new event range',
+    files: [{ path: 'hooks/use-drag-to-create.ts', type: 'registry:hook' }],
+  },
 
   // ─── Primitives (ui) ────────────────────────────────────────────────────
   {
@@ -211,6 +217,7 @@ export const registry: ManifestItem[] = [
       'day-labels',
       'use-event-drag',
       'use-event-resize',
+      'use-drag-to-create',
     ],
   },
   {

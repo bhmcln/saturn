@@ -4,6 +4,7 @@ import { format, isSameDay, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
+import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
 import { type WeekStartsOn, addDays, formatTime, getWeekDays } from '@/registry/default/lib/time'
@@ -31,6 +32,7 @@ interface WeekViewContextValue {
   onEventClick?: (event: CalendarEvent) => void
   onEventMove?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
   onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventCreate?: (start: Date, end: Date) => void
 }
 
 const WeekViewContext = React.createContext<WeekViewContextValue | null>(null)
@@ -59,6 +61,11 @@ export interface WeekViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>
    * Set to enable resize handles.
    */
   onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  /**
+   * Fired when the user drags across empty grid to create a new event.
+   * Set to enable drag-to-create.
+   */
+  onEventCreate?: (start: Date, end: Date) => void
 }
 
 function WeekViewRoot({
@@ -69,6 +76,7 @@ function WeekViewRoot({
   onEventClick,
   onEventMove,
   onEventResize,
+  onEventCreate,
   className,
   children,
   ...props
@@ -84,6 +92,7 @@ function WeekViewRoot({
       onEventClick,
       onEventMove,
       onEventResize,
+      onEventCreate,
     }),
     [
       date,
@@ -94,6 +103,7 @@ function WeekViewRoot({
       onEventClick,
       onEventMove,
       onEventResize,
+      onEventCreate,
     ],
   )
   return (
@@ -232,13 +242,47 @@ interface EventsProps {
 }
 
 function Events({ children }: EventsProps) {
-  const { events, weekDays } = useWeekView()
+  const { events, weekDays, onEventCreate } = useWeekView()
   const olRef = React.useRef<HTMLOListElement>(null)
+
+  const pointToDate = (point: { x: number; y: number }): Date => {
+    const ol = olRef.current
+    if (!ol) return new Date()
+    const rect = ol.getBoundingClientRect()
+    const dayWidth = rect.width / weekDays.length
+    const dayIdx = Math.min(
+      weekDays.length - 1,
+      Math.max(0, Math.floor(point.x / dayWidth)),
+    )
+    const day = weekDays[dayIdx] ?? weekDays[0]
+    if (!day) return new Date()
+    const timeHeight = rect.height - HEADER_OFFSET_PX
+    const adjustedY = Math.max(0, point.y - HEADER_OFFSET_PX)
+    const minutesIntoDay = timeHeight > 0 ? (adjustedY / timeHeight) * 24 * 60 : 0
+    const d = new Date(day)
+    d.setHours(0, 0, 0, 0)
+    d.setMinutes(minutesIntoDay)
+    return d
+  }
+
+  const { preview, handlers } = useDragToCreate({
+    disabled: !onEventCreate,
+    snapMinutes: 15,
+    pointToDate,
+    onCreate(start, end) {
+      onEventCreate?.(start, end)
+    },
+  })
+
   return (
     <ol
       ref={olRef}
       style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
-      className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 sm:grid-cols-7 sm:pr-8"
+      className={cn(
+        'col-start-1 col-end-2 row-start-1 grid grid-cols-1 sm:grid-cols-7 sm:pr-8',
+        onEventCreate && 'cursor-crosshair',
+      )}
+      {...handlers}
     >
       {events.map((event) => {
         const dayIndex = weekDays.findIndex((d) => isSameDay(d, event.start))
@@ -254,7 +298,40 @@ function Events({ children }: EventsProps) {
           />
         )
       })}
+      {preview && <CreatePreview start={preview.start} end={preview.end} weekDays={weekDays} />}
     </ol>
+  )
+}
+
+function CreatePreview({
+  start,
+  end,
+  weekDays,
+}: {
+  start: Date
+  end: Date
+  weekDays: Date[]
+}) {
+  const dayIndex = weekDays.findIndex((d) => isSameDay(d, start))
+  if (dayIndex === -1) return null
+  const startMinutes = start.getHours() * 60 + start.getMinutes()
+  const durationMinutes = Math.max(5, (end.getTime() - start.getTime()) / 60000)
+  const rowStart = Math.floor(startMinutes / 5) + 2
+  const rowSpan = Math.ceil(durationMinutes / 5)
+  return (
+    <li
+      style={{
+        gridRow: `${rowStart} / span ${rowSpan}`,
+        gridColumnStart: dayIndex + 1,
+      }}
+      className="pointer-events-none relative mt-px flex"
+    >
+      <div className="absolute inset-1 rounded-lg border-2 border-primary bg-primary/15 px-2 py-1 text-xs font-semibold text-primary">
+        <span>
+          {formatTime(start)} – {formatTime(end)}
+        </span>
+      </div>
+    </li>
   )
 }
 

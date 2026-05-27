@@ -20,6 +20,7 @@ import { TimeGutterDemo } from './time-gutter-demo'
 import { TimePickerDemo } from './time-picker-demo'
 import { TimelineViewDemo } from './timeline-view-demo'
 import { TooltipDemo } from './tooltip-demo'
+import { UseDragToCreateDemo } from './use-drag-to-create-demo'
 import { UseEventDragDemo } from './use-event-drag-demo'
 import { UseEventResizeDemo } from './use-event-resize-demo'
 import { ViewModeSwitcherDemo } from './view-mode-switcher-demo'
@@ -116,6 +117,10 @@ export const DEMOS: Record<string, DemoSpec> = {
   'time-picker': { element: <TimePickerDemo />, filename: 'time-picker-demo.tsx' },
   'use-event-drag': { element: <UseEventDragDemo />, filename: 'use-event-drag-demo.tsx' },
   'use-event-resize': { element: <UseEventResizeDemo />, filename: 'use-event-resize-demo.tsx' },
+  'use-drag-to-create': {
+    element: <UseDragToCreateDemo />,
+    filename: 'use-drag-to-create-demo.tsx',
+  },
 }
 
 export function getDemo(name: string): DemoSpec | undefined {

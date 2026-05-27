@@ -170,6 +170,18 @@ export function WeekViewDemo() {
           current.map((e) => (e.id === event.id ? { ...e, start: newStart, end: newEnd } : e)),
         )
       }}
+      onEventCreate={(start, end) => {
+        setEvents((current) => [
+          ...current,
+          {
+            id: `new-${Date.now()}`,
+            title: 'New visit',
+            start,
+            end,
+            color: 'blue',
+          },
+        ])
+      }}
     >
       <WeekView.Header>
         <WeekView.Title />
