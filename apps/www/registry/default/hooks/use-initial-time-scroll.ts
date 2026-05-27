@@ -1,5 +1,12 @@
 import * as React from 'react'
 
+// useLayoutEffect on the client, useEffect on the server. Required because
+// useLayoutEffect emits a warning if run during SSR. Saturn components are
+// 'use client' so they won't actually render on the server, but consumers
+// who wrap them in SSR-safe shells benefit from the guard.
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect
+
 export interface UseInitialTimeScrollOptions {
   /**
    * Ref to an element inside the scroll container. The hook walks up to
@@ -38,7 +45,7 @@ export function useInitialTimeScroll({
 }: UseInitialTimeScrollOptions): void {
   const didScrollRef = React.useRef(false)
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!enabled || didScrollRef.current) return
     if (!ref.current) return
 
