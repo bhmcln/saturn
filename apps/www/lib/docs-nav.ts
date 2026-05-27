@@ -64,6 +64,8 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'Timeline View', href: '/docs/timeline-view' },
       { title: 'Resource Row', href: '/docs/resource-row' },
       { title: 'Swimlane View', href: '/docs/swimlane-view' },
+      { title: 'Multi-day View', href: '/docs/multi-day-view' },
+      { title: 'Year View', href: '/docs/year-view' },
     ],
   },
   {

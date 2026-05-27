@@ -253,6 +253,22 @@ export const registry: ManifestItem[] = [
     dependencies: ['lucide-react'],
     registryDependencies: ['utils'],
   },
+  {
+    name: 'multi-day-view',
+    type: 'registry:ui',
+    description: 'N-day horizontal calendar view (3-day, work-week, custom)',
+    files: [{ path: 'ui/multi-day-view.tsx', type: 'registry:ui' }],
+    dependencies: ['date-fns', 'lucide-react'],
+    registryDependencies: ['utils', 'time', 'event-card', 'tooltip', 'time-gutter', 'day-labels'],
+  },
+  {
+    name: 'year-view',
+    type: 'registry:ui',
+    description: '12-month overview with per-day density heatmap',
+    files: [{ path: 'ui/year-view.tsx', type: 'registry:ui' }],
+    dependencies: ['date-fns', 'lucide-react'],
+    registryDependencies: ['utils', 'time'],
+  },
 
   // ─── Inputs (ui) ────────────────────────────────────────────────────────
   {

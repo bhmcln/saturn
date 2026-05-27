@@ -10,6 +10,7 @@ import { DayViewDemo } from './day-view-demo'
 import { EventCardDemo } from './event-card-demo'
 import { MiniCalendarDemo } from './mini-calendar-demo'
 import { MonthViewDemo } from './month-view-demo'
+import { MultiDayViewDemo } from './multi-day-view-demo'
 import { NowIndicatorDemo } from './now-indicator-demo'
 import { PeriodBoundaryMarkerDemo } from './period-boundary-marker-demo'
 import { PeriodNavigatorDemo } from './period-navigator-demo'
@@ -21,6 +22,7 @@ import { TimelineViewDemo } from './timeline-view-demo'
 import { TooltipDemo } from './tooltip-demo'
 import { ViewModeSwitcherDemo } from './view-mode-switcher-demo'
 import { WeekViewDemo } from './week-view-demo'
+import { YearViewDemo } from './year-view-demo'
 import { ZoomControlsDemo } from './zoom-controls-demo'
 
 export interface DemoSpec {
@@ -92,6 +94,16 @@ export const DEMOS: Record<string, DemoSpec> = {
     element: <SwimlaneViewDemo />,
     filename: 'swimlane-view-demo.tsx',
     previewClassName: 'block h-[520px] p-0 min-h-0',
+  },
+  'multi-day-view': {
+    element: <MultiDayViewDemo />,
+    filename: 'multi-day-view-demo.tsx',
+    previewClassName: 'block h-[640px] p-0 min-h-0',
+  },
+  'year-view': {
+    element: <YearViewDemo />,
+    filename: 'year-view-demo.tsx',
+    previewClassName: 'block h-[640px] p-0 min-h-0',
   },
 
   'date-picker': { element: <DatePickerDemo />, filename: 'date-picker-demo.tsx' },
