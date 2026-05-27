@@ -84,6 +84,13 @@ export const registry: ManifestItem[] = [
     description: 'ShortcutMap → handlers, ignoring focus in input / textarea / contenteditable',
     files: [{ path: 'hooks/use-keyboard-shortcuts.ts', type: 'registry:hook' }],
   },
+  {
+    name: 'use-event-drag',
+    type: 'registry:hook',
+    description:
+      'Pointer-events drag handler that snaps to a minute increment — wire to onEventMove',
+    files: [{ path: 'hooks/use-event-drag.ts', type: 'registry:hook' }],
+  },
 
   // ─── Primitives (ui) ────────────────────────────────────────────────────
   {
@@ -185,10 +192,18 @@ export const registry: ManifestItem[] = [
   {
     name: 'week-view',
     type: 'registry:ui',
-    description: 'Seven-day calendar view with time grid and positioned events',
+    description: 'Seven-day calendar view with time grid, positioned events, and drag-to-move',
     files: [{ path: 'ui/week-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: ['utils', 'time', 'event-card', 'tooltip', 'time-gutter', 'day-labels'],
+    registryDependencies: [
+      'utils',
+      'time',
+      'event-card',
+      'tooltip',
+      'time-gutter',
+      'day-labels',
+      'use-event-drag',
+    ],
   },
   {
     name: 'day-view',

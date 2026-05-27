@@ -34,6 +34,7 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'useTimeGrid', href: '/docs/use-time-grid' },
       { title: 'useZoom', href: '/docs/use-zoom' },
       { title: 'useKeyboardShortcuts', href: '/docs/use-keyboard-shortcuts' },
+      { title: 'useEventDrag', href: '/docs/use-event-drag' },
     ],
   },
   {

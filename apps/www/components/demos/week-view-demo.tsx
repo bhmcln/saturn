@@ -152,7 +152,7 @@ function makeRoster(anchor: Date): CalendarEvent[] {
 
 export function WeekViewDemo() {
   const [date, setDate] = useState(() => new Date())
-  const events = makeRoster(date)
+  const [events, setEvents] = useState<CalendarEvent[]>(() => makeRoster(new Date()))
 
   return (
     <WeekView
@@ -160,6 +160,11 @@ export function WeekViewDemo() {
       onDateChange={setDate}
       events={events}
       onEventClick={(e) => console.log('visit clicked', e)}
+      onEventMove={(event, newStart, newEnd) => {
+        setEvents((current) =>
+          current.map((e) => (e.id === event.id ? { ...e, start: newStart, end: newEnd } : e)),
+        )
+      }}
     >
       <WeekView.Header>
         <WeekView.Title />

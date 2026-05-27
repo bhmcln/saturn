@@ -138,7 +138,13 @@ const VIEWS: ViewMode[] = ['day', 'week', 'month', 'agenda']
 export function CalendarDemo() {
   const [date, setDate] = useState(() => new Date())
   const [view, setView] = useState<ViewMode>('week')
-  const events = makeRoster(date)
+  const [events, setEvents] = useState<CalendarEvent[]>(() => makeRoster(new Date()))
+
+  const moveEvent = (event: CalendarEvent, newStart: Date, newEnd: Date) => {
+    setEvents((current) =>
+      current.map((e) => (e.id === event.id ? { ...e, start: newStart, end: newEnd } : e)),
+    )
+  }
 
   const switcher = <ViewModeSwitcher value={view} onValueChange={setView} views={VIEWS} />
 
@@ -193,7 +199,7 @@ export function CalendarDemo() {
   }
 
   return (
-    <WeekView date={date} onDateChange={setDate} events={events}>
+    <WeekView date={date} onDateChange={setDate} events={events} onEventMove={moveEvent}>
       <WeekView.Header>
         <WeekView.Title />
         <div className="flex items-center gap-3">
