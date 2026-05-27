@@ -40,7 +40,14 @@ export function ComponentPreview({
       </div>
 
       {tab === 'preview' ? (
-        <div className={cn('relative flex min-h-[480px] w-full', previewClassName)}>{preview}</div>
+        <div
+          className={cn(
+            'relative flex min-h-[420px] w-full items-center justify-center p-10',
+            previewClassName,
+          )}
+        >
+          {preview}
+        </div>
       ) : (
         <pre className="m-0 max-h-[640px] overflow-auto bg-code px-5 py-4 text-xs leading-relaxed text-code-foreground">
           <code className="font-mono">{source}</code>

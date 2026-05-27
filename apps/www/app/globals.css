@@ -122,3 +122,11 @@
 @utility border-grid {
   border-top: 1px solid color-mix(in oklch, var(--color-border) 50%, transparent);
 }
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

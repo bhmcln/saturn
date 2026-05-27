@@ -8,8 +8,8 @@ import { usePathname } from 'next/navigation'
 export function DocsSidebar() {
   const pathname = usePathname()
   return (
-    <aside className="sticky top-[var(--header-height)] hidden h-[calc(100svh-var(--header-height))] w-64 shrink-0 overflow-y-auto border-r lg:block">
-      <nav className="flex flex-col gap-6 py-8 pr-6">
+    <aside className="scrollbar-hide sticky top-[var(--header-height)] hidden h-[calc(100svh-var(--header-height))] shrink-0 overflow-y-auto border-r lg:block">
+      <nav className="flex flex-col gap-6 py-8 pr-4 pl-6 lg:pl-8">
         {docsNav.map((group) => (
           <div key={group.title}>
             <h2 className="mb-2 px-2 text-sm font-semibold tracking-tight text-foreground">
@@ -23,7 +23,8 @@ export function DocsSidebar() {
                     <Link
                       href={item.href}
                       className={cn(
-                        'block rounded-md px-2 py-1.5 text-sm transition-colors',
+                        'block rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+                        'focus-visible:bg-accent focus-visible:text-accent-foreground',
                         active
                           ? 'bg-muted font-medium text-foreground'
                           : 'text-muted-foreground hover:text-foreground',

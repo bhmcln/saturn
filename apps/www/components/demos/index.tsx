@@ -34,22 +34,22 @@ export const DEMOS: Record<string, DemoSpec> = {
   'week-view': {
     element: <WeekViewDemo />,
     filename: 'week-view-demo.tsx',
-    previewClassName: 'h-[640px] p-0 min-h-0',
+    previewClassName: 'block h-[640px] p-0 min-h-0',
   },
   'day-view': {
     element: <DayViewDemo />,
     filename: 'day-view-demo.tsx',
-    previewClassName: 'h-[640px] p-0 min-h-0',
+    previewClassName: 'block h-[640px] p-0 min-h-0',
   },
   'month-view': {
     element: <MonthViewDemo />,
     filename: 'month-view-demo.tsx',
-    previewClassName: 'h-[640px] p-0 min-h-0',
+    previewClassName: 'block h-[640px] p-0 min-h-0',
   },
   'agenda-view': {
     element: <AgendaViewDemo />,
     filename: 'agenda-view-demo.tsx',
-    previewClassName: 'h-[560px] p-0 min-h-0',
+    previewClassName: 'block h-[560px] p-0 min-h-0',
   },
   'period-navigator': {
     element: <PeriodNavigatorDemo />,
