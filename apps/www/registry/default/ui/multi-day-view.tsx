@@ -8,6 +8,7 @@ import { useDragAutoscroll } from '@/registry/default/hooks/use-drag-autoscroll'
 import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
+import { useInitialTimeScroll } from '@/registry/default/hooks/use-initial-time-scroll'
 import { addDays, formatTime } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { DayLabels as DayLabelsPrimitive } from '@/registry/default/ui/day-labels'
@@ -192,6 +193,11 @@ function Grid({ className }: { className?: string }) {
   const { date, days, dayCount, events, onEventCreate } = useMultiDayView()
   const colsTemplate = `repeat(${dayCount}, minmax(0, 1fr))`
   const olRef = React.useRef<HTMLOListElement>(null)
+
+  useInitialTimeScroll({
+    ref: olRef,
+    targetMinutes: earliestEventMinutes(events) ?? 8 * 60,
+  })
 
   const pointToDate = (point: { x: number; y: number }): Date => {
     const ol = olRef.current
@@ -446,6 +452,17 @@ function MultiDayEventItem({ event, dayIndex, dayCount, containerRef }: MultiDay
       {showEndSnap && <MultiDaySnapLine time={renderedEnd} dayCount={dayCount} />}
     </>
   )
+}
+
+function earliestEventMinutes(events: CalendarEvent[]): number | undefined {
+  if (events.length === 0) return undefined
+  let earliest = Number.POSITIVE_INFINITY
+  for (const e of events) {
+    const m = e.start.getHours() * 60 + e.start.getMinutes()
+    if (m < earliest) earliest = m
+  }
+  if (!Number.isFinite(earliest)) return undefined
+  return Math.max(0, earliest - 30)
 }
 
 function MultiDaySnapLine({ time, dayCount }: { time: Date; dayCount: number }) {

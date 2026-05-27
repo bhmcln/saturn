@@ -8,6 +8,7 @@ import { useDragAutoscroll } from '@/registry/default/hooks/use-drag-autoscroll'
 import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
+import { useInitialTimeScroll } from '@/registry/default/hooks/use-initial-time-scroll'
 import { type WeekStartsOn, addDays, formatTime, getWeekDays } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { DayLabels as DayLabelsPrimitive } from '@/registry/default/ui/day-labels'
@@ -245,6 +246,8 @@ interface EventsProps {
 function Events({ children }: EventsProps) {
   const { events, weekDays, onEventCreate } = useWeekView()
   const olRef = React.useRef<HTMLOListElement>(null)
+
+  useInitialTimeScroll({ ref: olRef, targetMinutes: earliestEventMinutes(events) ?? 8 * 60 })
 
   const pointToDate = (point: { x: number; y: number }): Date => {
     const ol = olRef.current
@@ -509,6 +512,18 @@ function EventItem({ event, dayIndex, dayCount, containerRef, renderItem }: Even
       {showEndSnap && <SnapLine time={renderedEnd} dayCount={dayCount} />}
     </>
   )
+}
+
+/** Minute-of-day of the earliest event, with a 30-minute lead-in, or undefined if empty. */
+function earliestEventMinutes(events: CalendarEvent[]): number | undefined {
+  if (events.length === 0) return undefined
+  let earliest = Number.POSITIVE_INFINITY
+  for (const e of events) {
+    const m = e.start.getHours() * 60 + e.start.getMinutes()
+    if (m < earliest) earliest = m
+  }
+  if (!Number.isFinite(earliest)) return undefined
+  return Math.max(0, earliest - 30)
 }
 
 function SnapLine({ time, dayCount }: { time: Date; dayCount: number }) {

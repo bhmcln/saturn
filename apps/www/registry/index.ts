@@ -111,6 +111,13 @@ export const registry: ManifestItem[] = [
       'Auto-scrolls the nearest scrollable ancestor when the pointer is near its edge during a drag',
     files: [{ path: 'hooks/use-drag-autoscroll.ts', type: 'registry:hook' }],
   },
+  {
+    name: 'use-initial-time-scroll',
+    type: 'registry:hook',
+    description:
+      'On first mount, scrolls the nearest scrollable ancestor to a time-of-day so views land near events',
+    files: [{ path: 'hooks/use-initial-time-scroll.ts', type: 'registry:hook' }],
+  },
 
   // ─── Primitives (ui) ────────────────────────────────────────────────────
   {
@@ -226,6 +233,7 @@ export const registry: ManifestItem[] = [
       'use-event-resize',
       'use-drag-to-create',
       'use-drag-autoscroll',
+      'use-initial-time-scroll',
     ],
   },
   {
@@ -246,6 +254,7 @@ export const registry: ManifestItem[] = [
       'use-event-resize',
       'use-drag-to-create',
       'use-drag-autoscroll',
+      'use-initial-time-scroll',
     ],
   },
   {
@@ -319,6 +328,7 @@ export const registry: ManifestItem[] = [
       'use-event-resize',
       'use-drag-to-create',
       'use-drag-autoscroll',
+      'use-initial-time-scroll',
     ],
   },
   {

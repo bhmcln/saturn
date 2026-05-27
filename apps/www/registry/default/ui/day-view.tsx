@@ -9,6 +9,7 @@ import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventLayout } from '@/registry/default/hooks/use-event-layout'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
+import { useInitialTimeScroll } from '@/registry/default/hooks/use-initial-time-scroll'
 import { useNow } from '@/registry/default/hooks/use-now'
 import { addDays, formatTime } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
@@ -189,6 +190,11 @@ function Grid({ className }: { className?: string }) {
   const layout = useEventLayout(dayEvents)
   const showsToday = isToday(date)
   const olRef = React.useRef<HTMLOListElement>(null)
+
+  useInitialTimeScroll({
+    ref: olRef,
+    targetMinutes: earliestEventMinutes(dayEvents) ?? 8 * 60,
+  })
 
   const pointToDate = (point: { x: number; y: number }): Date => {
     const ol = olRef.current
@@ -411,6 +417,17 @@ function DayEventItem({ event, leftPct, widthPct, containerRef }: DayEventItemPr
       {showEndSnap && <SnapLine time={renderedEnd} />}
     </>
   )
+}
+
+function earliestEventMinutes(events: CalendarEvent[]): number | undefined {
+  if (events.length === 0) return undefined
+  let earliest = Number.POSITIVE_INFINITY
+  for (const e of events) {
+    const m = e.start.getHours() * 60 + e.start.getMinutes()
+    if (m < earliest) earliest = m
+  }
+  if (!Number.isFinite(earliest)) return undefined
+  return Math.max(0, earliest - 30)
 }
 
 function SnapLine({ time }: { time: Date }) {

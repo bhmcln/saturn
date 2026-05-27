@@ -38,6 +38,7 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'useEventResize', href: '/docs/use-event-resize' },
       { title: 'useDragToCreate', href: '/docs/use-drag-to-create' },
       { title: 'useDragAutoscroll', href: '/docs/use-drag-autoscroll' },
+      { title: 'useInitialTimeScroll', href: '/docs/use-initial-time-scroll' },
     ],
   },
   {
