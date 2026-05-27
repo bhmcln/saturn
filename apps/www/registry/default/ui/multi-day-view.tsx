@@ -4,6 +4,9 @@ import { format, isSameDay } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
+import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
+import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
+import { useEventResize } from '@/registry/default/hooks/use-event-resize'
 import { addDays, formatTime } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { DayLabels as DayLabelsPrimitive } from '@/registry/default/ui/day-labels'
@@ -27,6 +30,9 @@ interface MultiDayViewContextValue {
   events: CalendarEvent[]
   onDateChange?: (date: Date) => void
   onEventClick?: (event: CalendarEvent) => void
+  onEventMove?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventCreate?: (start: Date, end: Date) => void
 }
 
 const MultiDayViewContext = React.createContext<MultiDayViewContextValue | null>(null)
@@ -46,6 +52,9 @@ export interface MultiDayViewProps extends Omit<React.HTMLAttributes<HTMLDivElem
   events?: CalendarEvent[]
   onDateChange?: (date: Date) => void
   onEventClick?: (event: CalendarEvent) => void
+  onEventMove?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventCreate?: (start: Date, end: Date) => void
 }
 
 function MultiDayViewRoot({
@@ -54,6 +63,9 @@ function MultiDayViewRoot({
   events = [],
   onDateChange,
   onEventClick,
+  onEventMove,
+  onEventResize,
+  onEventCreate,
   className,
   children,
   ...props
@@ -70,8 +82,21 @@ function MultiDayViewRoot({
       events,
       onDateChange,
       onEventClick,
+      onEventMove,
+      onEventResize,
+      onEventCreate,
     }),
-    [date, dayList, days, events, onDateChange, onEventClick],
+    [
+      date,
+      dayList,
+      days,
+      events,
+      onDateChange,
+      onEventClick,
+      onEventMove,
+      onEventResize,
+      onEventCreate,
+    ],
   )
   return (
     <MultiDayViewContext.Provider value={value}>
@@ -159,10 +184,39 @@ function DayLabels({ className }: { className?: string }) {
   return <DayLabelsPrimitive days={days} className={className} />
 }
 
+const HEADER_OFFSET_PX = 28 // 1.75rem
+const MS_PER_DAY = 86_400_000
+
 function Grid({ className }: { className?: string }) {
-  const { date, days, dayCount, events, onEventClick } = useMultiDayView()
-  // Build a fractional grid based on dayCount via gridTemplateColumns.
+  const { date, days, dayCount, events, onEventCreate } = useMultiDayView()
   const colsTemplate = `repeat(${dayCount}, minmax(0, 1fr))`
+  const olRef = React.useRef<HTMLOListElement>(null)
+
+  const pointToDate = (point: { x: number; y: number }): Date => {
+    const ol = olRef.current
+    if (!ol) return new Date()
+    const rect = ol.getBoundingClientRect()
+    const dayWidth = rect.width / dayCount
+    const dayIdx = Math.min(dayCount - 1, Math.max(0, Math.floor(point.x / dayWidth)))
+    const day = days[dayIdx] ?? days[0]
+    if (!day) return new Date()
+    const timeHeight = rect.height - HEADER_OFFSET_PX
+    const adjustedY = Math.max(0, point.y - HEADER_OFFSET_PX)
+    const minutesIntoDay = timeHeight > 0 ? (adjustedY / timeHeight) * 24 * 60 : 0
+    const d = new Date(day)
+    d.setHours(0, 0, 0, 0)
+    d.setMinutes(minutesIntoDay)
+    return d
+  }
+
+  const { preview, handlers } = useDragToCreate({
+    disabled: !onEventCreate,
+    snapMinutes: 15,
+    pointToDate,
+    onCreate(start, end) {
+      onEventCreate?.(start, end)
+    },
+  })
 
   return (
     <div className={cn('flex flex-auto', className)}>
@@ -192,57 +246,220 @@ function Grid({ className }: { className?: string }) {
 
         {/* Events */}
         <ol
+          ref={olRef}
           style={{
             gridTemplateColumns: colsTemplate,
             gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto',
           }}
-          className="col-start-1 col-end-2 row-start-1 grid"
+          className={cn(
+            'col-start-1 col-end-2 row-start-1 grid',
+            onEventCreate && 'cursor-crosshair',
+          )}
+          {...handlers}
         >
           {events.map((event) => {
             const dayIndex = days.findIndex((d) => isSameDay(d, event.start))
             if (dayIndex === -1) return null
-            const startMinutes = event.start.getHours() * 60 + event.start.getMinutes()
-            const durationMinutes = Math.max(
-              5,
-              (event.end.getTime() - event.start.getTime()) / 60000,
-            )
-            const rowStart = Math.floor(startMinutes / 5) + 2
-            const rowSpan = Math.ceil(durationMinutes / 5)
             return (
-              <li
+              <MultiDayEventItem
                 key={event.id}
-                style={{
-                  gridRow: `${rowStart} / span ${rowSpan}`,
-                  gridColumnStart: dayIndex + 1,
-                }}
-                className="relative mt-px flex dark:before:pointer-events-none dark:before:absolute dark:before:inset-1 dark:before:z-0 dark:before:rounded-lg dark:before:bg-background"
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <EventCard
-                      color={event.color ?? 'gray'}
-                      className="absolute inset-1 cursor-pointer"
-                      onClick={() => onEventClick?.(event)}
-                    >
-                      <EventCard.Title>{event.title}</EventCard.Title>
-                      <EventCard.Time>
-                        <time dateTime={event.start.toISOString()}>{formatTime(event.start)}</time>
-                      </EventCard.Time>
-                    </EventCard>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="font-semibold">{event.title}</p>
-                    <p className="opacity-80">
-                      {formatTime(event.start)} – {formatTime(event.end)}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
+                event={event}
+                dayIndex={dayIndex}
+                dayCount={dayCount}
+                containerRef={olRef}
+              />
             )
           })}
+          {preview && <MultiDayCreatePreview start={preview.start} end={preview.end} days={days} />}
         </ol>
       </div>
     </div>
+  )
+}
+
+interface MultiDayEventItemProps {
+  event: CalendarEvent
+  dayIndex: number
+  dayCount: number
+  containerRef: React.RefObject<HTMLOListElement | null>
+}
+
+function MultiDayEventItem({ event, dayIndex, dayCount, containerRef }: MultiDayEventItemProps) {
+  const { onEventClick, onEventMove, onEventResize } = useMultiDayView()
+  const [dragMs, setDragMs] = React.useState(0)
+  const [resizeTopMs, setResizeTopMs] = React.useState(0)
+  const [resizeBottomMs, setResizeBottomMs] = React.useState(0)
+  const justDraggedAt = React.useRef(0)
+
+  const verticalMsPerPx = (): number => {
+    const el = containerRef.current
+    if (!el) return 0
+    const rect = el.getBoundingClientRect()
+    const timeHeight = rect.height - HEADER_OFFSET_PX
+    if (timeHeight <= 0) return 0
+    return (24 * 60 * 60 * 1000) / timeHeight
+  }
+
+  const { isDragging, handlers } = useEventDrag({
+    disabled: !onEventMove,
+    snapMinutes: 15,
+    getDelta(dx, dy) {
+      const ms = verticalMsPerPx()
+      if (ms === 0) return 0
+      const el = containerRef.current
+      if (!el) return 0
+      const dayPx = el.getBoundingClientRect().width / dayCount
+      const dayDelta = dayPx > 0 ? Math.round(dx / dayPx) : 0
+      return dy * ms + dayDelta * MS_PER_DAY
+    },
+    onDrag: setDragMs,
+    onMove(delta) {
+      setDragMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventMove) return
+      onEventMove(
+        event,
+        new Date(event.start.getTime() + delta),
+        new Date(event.end.getTime() + delta),
+      )
+    },
+  })
+
+  const resizeTop = useEventResize({
+    edge: 'top',
+    disabled: !onEventResize,
+    snapMinutes: 15,
+    getDelta: (_dx, dy) => dy * verticalMsPerPx(),
+    onDragging: setResizeTopMs,
+    onResize(delta) {
+      setResizeTopMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventResize) return
+      const newStart = new Date(event.start.getTime() + delta)
+      if (newStart >= event.end) return
+      onEventResize(event, newStart, event.end)
+    },
+  })
+
+  const resizeBottom = useEventResize({
+    edge: 'bottom',
+    disabled: !onEventResize,
+    snapMinutes: 15,
+    getDelta: (_dx, dy) => dy * verticalMsPerPx(),
+    onDragging: setResizeBottomMs,
+    onResize(delta) {
+      setResizeBottomMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventResize) return
+      const newEnd = new Date(event.end.getTime() + delta)
+      if (newEnd <= event.start) return
+      onEventResize(event, event.start, newEnd)
+    },
+  })
+
+  const renderedStart = new Date(event.start.getTime() + dragMs + resizeTopMs)
+  const renderedEnd = new Date(event.end.getTime() + dragMs + resizeBottomMs)
+  const startMinutes = renderedStart.getHours() * 60 + renderedStart.getMinutes()
+  const durationMinutes = Math.max(5, (renderedEnd.getTime() - renderedStart.getTime()) / 60000)
+  const rowStart = Math.floor(startMinutes / 5) + 2
+  const rowSpan = Math.ceil(durationMinutes / 5)
+  const dayDelta = Math.floor(dragMs / MS_PER_DAY)
+  const renderedDay = Math.max(0, Math.min(dayCount - 1, dayIndex + dayDelta))
+  const isInteracting = isDragging || resizeTop.isResizing || resizeBottom.isResizing
+
+  const handleClick = () => {
+    if (Date.now() - justDraggedAt.current < 200) return
+    onEventClick?.(event)
+  }
+
+  const stopAndStart =
+    (h: (event: React.PointerEvent<HTMLElement>) => void) =>
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation()
+      h(event)
+    }
+
+  return (
+    <li
+      style={{
+        gridRow: `${rowStart} / span ${rowSpan}`,
+        gridColumnStart: renderedDay + 1,
+      }}
+      className={cn(
+        'relative mt-px flex dark:before:pointer-events-none dark:before:absolute dark:before:inset-1 dark:before:z-0 dark:before:rounded-lg dark:before:bg-background',
+        isInteracting && 'z-30',
+      )}
+    >
+      <Tooltip open={isInteracting ? false : undefined}>
+        <TooltipTrigger asChild>
+          <EventCard
+            color={event.color ?? 'gray'}
+            className={cn(
+              'group/event absolute inset-1 touch-none select-none',
+              onEventMove ? 'cursor-grab' : 'cursor-pointer',
+              isInteracting && 'cursor-grabbing shadow-lg ring-2 ring-primary/60',
+            )}
+            onClick={handleClick}
+            {...handlers}
+          >
+            <EventCard.Title>{event.title}</EventCard.Title>
+            <EventCard.Time>
+              <time dateTime={renderedStart.toISOString()}>{formatTime(renderedStart)}</time>
+            </EventCard.Time>
+            {onEventResize && (
+              <>
+                <div
+                  onPointerDown={stopAndStart(resizeTop.handlers.onPointerDown)}
+                  className="absolute top-0 right-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
+                  aria-label="Resize event start"
+                />
+                <div
+                  onPointerDown={stopAndStart(resizeBottom.handlers.onPointerDown)}
+                  className="absolute right-0 bottom-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
+                  aria-label="Resize event end"
+                />
+              </>
+            )}
+          </EventCard>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p className="font-semibold">{event.title}</p>
+          <p className="opacity-80">
+            {formatTime(renderedStart)} – {formatTime(renderedEnd)}
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </li>
+  )
+}
+
+function MultiDayCreatePreview({
+  start,
+  end,
+  days,
+}: {
+  start: Date
+  end: Date
+  days: Date[]
+}) {
+  const dayIndex = days.findIndex((d) => isSameDay(d, start))
+  if (dayIndex === -1) return null
+  const startMinutes = start.getHours() * 60 + start.getMinutes()
+  const durationMinutes = Math.max(5, (end.getTime() - start.getTime()) / 60000)
+  const rowStart = Math.floor(startMinutes / 5) + 2
+  const rowSpan = Math.ceil(durationMinutes / 5)
+  return (
+    <li
+      style={{
+        gridRow: `${rowStart} / span ${rowSpan}`,
+        gridColumnStart: dayIndex + 1,
+      }}
+      className="pointer-events-none relative mt-px flex"
+    >
+      <div className="absolute inset-1 rounded-lg border-2 border-primary bg-primary/15 px-2 py-1 text-xs font-semibold text-primary">
+        {formatTime(start)} – {formatTime(end)}
+      </div>
+    </li>
   )
 }
 

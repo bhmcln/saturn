@@ -250,10 +250,7 @@ function Events({ children }: EventsProps) {
     if (!ol) return new Date()
     const rect = ol.getBoundingClientRect()
     const dayWidth = rect.width / weekDays.length
-    const dayIdx = Math.min(
-      weekDays.length - 1,
-      Math.max(0, Math.floor(point.x / dayWidth)),
-    )
+    const dayIdx = Math.min(weekDays.length - 1, Math.max(0, Math.floor(point.x / dayWidth)))
     const day = weekDays[dayIdx] ?? weekDays[0]
     if (!day) return new Date()
     const timeHeight = rect.height - HEADER_OFFSET_PX

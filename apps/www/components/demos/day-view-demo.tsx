@@ -47,14 +47,27 @@ function makeRun(anchor: Date): CalendarEvent[] {
 
 export function DayViewDemo() {
   const [date, setDate] = useState(() => new Date())
-  const events = makeRun(date)
+  const [events, setEvents] = useState<CalendarEvent[]>(() => makeRun(new Date()))
+
+  const updateRange = (event: CalendarEvent, newStart: Date, newEnd: Date) => {
+    setEvents((current) =>
+      current.map((e) => (e.id === event.id ? { ...e, start: newStart, end: newEnd } : e)),
+    )
+  }
 
   return (
     <DayView
       date={date}
       onDateChange={setDate}
       events={events}
-      onEventClick={(e) => console.log('visit clicked', e)}
+      onEventMove={updateRange}
+      onEventResize={updateRange}
+      onEventCreate={(start, end) =>
+        setEvents((current) => [
+          ...current,
+          { id: `new-${Date.now()}`, title: 'New visit', start, end, color: 'blue' },
+        ])
+      }
     >
       <DayView.Header>
         <DayView.Title />

@@ -1,5 +1,5 @@
-import type * as React from 'react'
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
+import type * as React from 'react'
 
 export interface UseEventResizeOptions {
   /**

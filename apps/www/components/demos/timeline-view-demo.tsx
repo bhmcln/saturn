@@ -105,25 +105,75 @@ const WORKERS: Worker[] = [
 
 export function TimelineViewDemo() {
   const [today] = useState(() => new Date())
+  const [workers, setWorkers] = useState<Worker[]>(WORKERS)
+
   const dayStart = new Date(today)
   dayStart.setHours(6, 0, 0, 0)
   const dayEnd = new Date(today)
   dayEnd.setHours(18, 0, 0, 0)
 
+  const updateActivity = (workerId: string, activityId: string, newStart: Date, newEnd: Date) => {
+    setWorkers((current) =>
+      current.map((w) =>
+        w.id !== workerId
+          ? w
+          : {
+              ...w,
+              activities: w.activities.map((a) =>
+                a.id !== activityId ? a : { ...a, start: newStart, end: newEnd },
+              ),
+            },
+      ),
+    )
+  }
+
+  const addActivity = (workerId: string, start: Date, end: Date) => {
+    setWorkers((current) =>
+      current.map((w) =>
+        w.id !== workerId
+          ? w
+          : {
+              ...w,
+              activities: [
+                ...w.activities,
+                {
+                  id: `new-${Date.now()}`,
+                  start,
+                  end,
+                  type: 'TASK',
+                  title: 'New visit',
+                },
+              ],
+            },
+      ),
+    )
+  }
+
   return (
     <TimelineView viewportStart={dayStart} viewportEnd={dayEnd}>
       <TimelineView.HourRuler />
       <TimelineView.Body>
-        {WORKERS.map((worker) => (
+        {workers.map((worker) => (
           <ResourceRow
             key={worker.id}
             label={<WorkerLabel name={worker.name} initials={worker.initials} />}
+            onCreateBlock={(start, end) => addActivity(worker.id, start, end)}
           >
             {worker.activities.map((activity) => (
-              <ResourceRow.Block key={activity.id} start={activity.start} end={activity.end}>
+              <ResourceRow.Block
+                key={activity.id}
+                start={activity.start}
+                end={activity.end}
+                onMove={(newStart, newEnd) =>
+                  updateActivity(worker.id, activity.id, newStart, newEnd)
+                }
+                onResize={(newStart, newEnd) =>
+                  updateActivity(worker.id, activity.id, newStart, newEnd)
+                }
+              >
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <ActivityBlock type={activity.type} className="cursor-pointer">
+                    <ActivityBlock type={activity.type} className="h-full">
                       <ActivityBlock.Title>{activity.title}</ActivityBlock.Title>
                       <ActivityBlock.Time>
                         {formatTime(activity.start)} – {formatTime(activity.end)}

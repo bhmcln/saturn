@@ -60,9 +60,29 @@ function makeEvents(anchor: Date): CalendarEvent[] {
 
 export function MultiDayViewDemo() {
   const [date, setDate] = useState(() => new Date())
-  const events = makeEvents(date)
+  const [events, setEvents] = useState<CalendarEvent[]>(() => makeEvents(new Date()))
+
+  const updateRange = (event: CalendarEvent, newStart: Date, newEnd: Date) => {
+    setEvents((current) =>
+      current.map((e) => (e.id === event.id ? { ...e, start: newStart, end: newEnd } : e)),
+    )
+  }
+
   return (
-    <MultiDayView date={date} days={3} onDateChange={setDate} events={events}>
+    <MultiDayView
+      date={date}
+      days={3}
+      onDateChange={setDate}
+      events={events}
+      onEventMove={updateRange}
+      onEventResize={updateRange}
+      onEventCreate={(start, end) =>
+        setEvents((current) => [
+          ...current,
+          { id: `new-${Date.now()}`, title: 'New visit', start, end, color: 'blue' },
+        ])
+      }
+    >
       <MultiDayView.Header>
         <MultiDayView.Title />
         <MultiDayView.Navigation />

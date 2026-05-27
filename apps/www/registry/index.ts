@@ -223,7 +223,7 @@ export const registry: ManifestItem[] = [
   {
     name: 'day-view',
     type: 'registry:ui',
-    description: 'Single-day calendar grid with positioned events and a now-line',
+    description: 'Single-day calendar grid with positioned events, drag-to-move, and now-line',
     files: [{ path: 'ui/day-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
     registryDependencies: [
@@ -234,6 +234,9 @@ export const registry: ManifestItem[] = [
       'time-gutter',
       'use-event-layout',
       'use-now',
+      'use-event-drag',
+      'use-event-resize',
+      'use-drag-to-create',
     ],
   },
   {
@@ -271,9 +274,15 @@ export const registry: ManifestItem[] = [
   {
     name: 'resource-row',
     type: 'registry:ui',
-    description: 'Single row with sticky-left label + positioned blocks on the track',
+    description: 'Sticky-label row + positioned blocks with drag-to-move + edge-resize + create',
     files: [{ path: 'ui/resource-row.tsx', type: 'registry:ui' }],
-    registryDependencies: ['utils', 'timeline-view'],
+    registryDependencies: [
+      'utils',
+      'timeline-view',
+      'use-event-drag',
+      'use-event-resize',
+      'use-drag-to-create',
+    ],
   },
   {
     name: 'swimlane-view',
@@ -286,10 +295,20 @@ export const registry: ManifestItem[] = [
   {
     name: 'multi-day-view',
     type: 'registry:ui',
-    description: 'N-day horizontal calendar view (3-day, work-week, custom)',
+    description: 'N-day horizontal calendar view (3-day, work-week, custom) with full DnD',
     files: [{ path: 'ui/multi-day-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: ['utils', 'time', 'event-card', 'tooltip', 'time-gutter', 'day-labels'],
+    registryDependencies: [
+      'utils',
+      'time',
+      'event-card',
+      'tooltip',
+      'time-gutter',
+      'day-labels',
+      'use-event-drag',
+      'use-event-resize',
+      'use-drag-to-create',
+    ],
   },
   {
     name: 'year-view',

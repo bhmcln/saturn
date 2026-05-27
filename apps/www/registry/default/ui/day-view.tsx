@@ -4,7 +4,10 @@ import { format, isSameDay, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
+import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
+import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventLayout } from '@/registry/default/hooks/use-event-layout'
+import { useEventResize } from '@/registry/default/hooks/use-event-resize'
 import { useNow } from '@/registry/default/hooks/use-now'
 import { addDays, formatTime } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
@@ -26,6 +29,9 @@ interface DayViewContextValue {
   dayEvents: CalendarEvent[]
   onDateChange?: (date: Date) => void
   onEventClick?: (event: CalendarEvent) => void
+  onEventMove?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventCreate?: (start: Date, end: Date) => void
 }
 
 const DayViewContext = React.createContext<DayViewContextValue | null>(null)
@@ -43,6 +49,12 @@ export interface DayViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   events?: CalendarEvent[]
   onDateChange?: (date: Date) => void
   onEventClick?: (event: CalendarEvent) => void
+  /** Enable drag-to-reschedule. */
+  onEventMove?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  /** Enable resize handles on event chips. */
+  onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  /** Enable drag-on-empty-grid to create a new event. */
+  onEventCreate?: (start: Date, end: Date) => void
 }
 
 function DayViewRoot({
@@ -50,6 +62,9 @@ function DayViewRoot({
   events = [],
   onDateChange,
   onEventClick,
+  onEventMove,
+  onEventResize,
+  onEventCreate,
   className,
   children,
   ...props
@@ -59,8 +74,16 @@ function DayViewRoot({
     [events, date],
   )
   const value = React.useMemo<DayViewContextValue>(
-    () => ({ date, dayEvents, onDateChange, onEventClick }),
-    [date, dayEvents, onDateChange, onEventClick],
+    () => ({
+      date,
+      dayEvents,
+      onDateChange,
+      onEventClick,
+      onEventMove,
+      onEventResize,
+      onEventCreate,
+    }),
+    [date, dayEvents, onDateChange, onEventClick, onEventMove, onEventResize, onEventCreate],
   )
   return (
     <DayViewContext.Provider value={value}>
@@ -158,10 +181,35 @@ function NowLine() {
   )
 }
 
+const HEADER_OFFSET_PX = 28 // 1.75rem
+
 function Grid({ className }: { className?: string }) {
-  const { date, dayEvents, onEventClick } = useDayView()
+  const { date, dayEvents, onEventCreate } = useDayView()
   const layout = useEventLayout(dayEvents)
   const showsToday = isToday(date)
+  const olRef = React.useRef<HTMLOListElement>(null)
+
+  const pointToDate = (point: { x: number; y: number }): Date => {
+    const ol = olRef.current
+    if (!ol) return date
+    const rect = ol.getBoundingClientRect()
+    const timeHeight = rect.height - HEADER_OFFSET_PX
+    const adjustedY = Math.max(0, point.y - HEADER_OFFSET_PX)
+    const minutesIntoDay = timeHeight > 0 ? (adjustedY / timeHeight) * 24 * 60 : 0
+    const d = new Date(date)
+    d.setHours(0, 0, 0, 0)
+    d.setMinutes(minutesIntoDay)
+    return d
+  }
+
+  const { preview, handlers } = useDragToCreate({
+    disabled: !onEventCreate,
+    snapMinutes: 15,
+    pointToDate,
+    onCreate(start, end) {
+      onEventCreate?.(start, end)
+    },
+  })
 
   return (
     <div className={cn('flex flex-auto', className)}>
@@ -181,54 +229,189 @@ function Grid({ className }: { className?: string }) {
 
         {/* Events + now-line */}
         <ol
+          ref={olRef}
           style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
-          className="col-start-1 col-end-2 row-start-1 grid grid-cols-1"
+          className={cn(
+            'col-start-1 col-end-2 row-start-1 grid grid-cols-1',
+            onEventCreate && 'cursor-crosshair',
+          )}
+          {...handlers}
         >
-          {layout.map(({ event, leftPct, widthPct }) => {
-            const startMinutes = event.start.getHours() * 60 + event.start.getMinutes()
-            const durationMinutes = Math.max(
-              5,
-              (event.end.getTime() - event.start.getTime()) / 60000,
-            )
-            const rowStart = Math.floor(startMinutes / 5) + 2
-            const rowSpan = Math.ceil(durationMinutes / 5)
-            return (
-              <li
-                key={event.id}
-                style={{ gridRow: `${rowStart} / span ${rowSpan}` }}
-                className="relative mt-px flex"
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <EventCard
-                      color={event.color ?? 'gray'}
-                      onClick={() => onEventClick?.(event)}
-                      style={{
-                        left: `calc(${leftPct}% + 0.25rem)`,
-                        width: `calc(${widthPct}% - 0.5rem)`,
-                      }}
-                      className="absolute top-1 bottom-1 cursor-pointer"
-                    >
-                      <EventCard.Title>{event.title}</EventCard.Title>
-                      <EventCard.Time>
-                        <time dateTime={event.start.toISOString()}>{formatTime(event.start)}</time>
-                      </EventCard.Time>
-                    </EventCard>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p className="font-semibold">{event.title}</p>
-                    <p className="opacity-80">
-                      {formatTime(event.start)} – {formatTime(event.end)}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
-            )
-          })}
+          {layout.map(({ event, leftPct, widthPct }) => (
+            <DayEventItem
+              key={event.id}
+              event={event}
+              leftPct={leftPct}
+              widthPct={widthPct}
+              containerRef={olRef}
+            />
+          ))}
+          {preview && <DayCreatePreview start={preview.start} end={preview.end} />}
           {showsToday && <NowLine />}
         </ol>
       </div>
     </div>
+  )
+}
+
+interface DayEventItemProps {
+  event: CalendarEvent
+  leftPct: number
+  widthPct: number
+  containerRef: React.RefObject<HTMLOListElement | null>
+}
+
+function DayEventItem({ event, leftPct, widthPct, containerRef }: DayEventItemProps) {
+  const { onEventClick, onEventMove, onEventResize } = useDayView()
+  const [dragMs, setDragMs] = React.useState(0)
+  const [resizeTopMs, setResizeTopMs] = React.useState(0)
+  const [resizeBottomMs, setResizeBottomMs] = React.useState(0)
+  const justDraggedAt = React.useRef(0)
+
+  const verticalMsPerPx = (): number => {
+    const el = containerRef.current
+    if (!el) return 0
+    const rect = el.getBoundingClientRect()
+    const timeHeight = rect.height - HEADER_OFFSET_PX
+    if (timeHeight <= 0) return 0
+    return (24 * 60 * 60 * 1000) / timeHeight
+  }
+
+  const { isDragging, handlers } = useEventDrag({
+    disabled: !onEventMove,
+    snapMinutes: 15,
+    getDelta: (_dx, dy) => dy * verticalMsPerPx(),
+    onDrag: setDragMs,
+    onMove(delta) {
+      setDragMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventMove) return
+      onEventMove(
+        event,
+        new Date(event.start.getTime() + delta),
+        new Date(event.end.getTime() + delta),
+      )
+    },
+  })
+
+  const resizeTop = useEventResize({
+    edge: 'top',
+    disabled: !onEventResize,
+    snapMinutes: 15,
+    getDelta: (_dx, dy) => dy * verticalMsPerPx(),
+    onDragging: setResizeTopMs,
+    onResize(delta) {
+      setResizeTopMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventResize) return
+      const newStart = new Date(event.start.getTime() + delta)
+      if (newStart >= event.end) return
+      onEventResize(event, newStart, event.end)
+    },
+  })
+
+  const resizeBottom = useEventResize({
+    edge: 'bottom',
+    disabled: !onEventResize,
+    snapMinutes: 15,
+    getDelta: (_dx, dy) => dy * verticalMsPerPx(),
+    onDragging: setResizeBottomMs,
+    onResize(delta) {
+      setResizeBottomMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventResize) return
+      const newEnd = new Date(event.end.getTime() + delta)
+      if (newEnd <= event.start) return
+      onEventResize(event, event.start, newEnd)
+    },
+  })
+
+  const renderedStart = new Date(event.start.getTime() + dragMs + resizeTopMs)
+  const renderedEnd = new Date(event.end.getTime() + dragMs + resizeBottomMs)
+  const startMinutes = renderedStart.getHours() * 60 + renderedStart.getMinutes()
+  const durationMinutes = Math.max(5, (renderedEnd.getTime() - renderedStart.getTime()) / 60000)
+  const rowStart = Math.floor(startMinutes / 5) + 2
+  const rowSpan = Math.ceil(durationMinutes / 5)
+  const isInteracting = isDragging || resizeTop.isResizing || resizeBottom.isResizing
+
+  const handleClick = () => {
+    if (Date.now() - justDraggedAt.current < 200) return
+    onEventClick?.(event)
+  }
+
+  const stopAndStart =
+    (h: (event: React.PointerEvent<HTMLElement>) => void) =>
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation()
+      h(event)
+    }
+
+  return (
+    <li
+      style={{ gridRow: `${rowStart} / span ${rowSpan}` }}
+      className={cn('relative mt-px flex', isInteracting && 'z-30')}
+    >
+      <Tooltip open={isInteracting ? false : undefined}>
+        <TooltipTrigger asChild>
+          <EventCard
+            color={event.color ?? 'gray'}
+            onClick={handleClick}
+            style={{
+              left: `calc(${leftPct}% + 0.25rem)`,
+              width: `calc(${widthPct}% - 0.5rem)`,
+            }}
+            className={cn(
+              'group/event absolute top-1 bottom-1 touch-none select-none',
+              onEventMove ? 'cursor-grab' : 'cursor-pointer',
+              isInteracting && 'cursor-grabbing shadow-lg ring-2 ring-primary/60',
+            )}
+            {...handlers}
+          >
+            <EventCard.Title>{event.title}</EventCard.Title>
+            <EventCard.Time>
+              <time dateTime={renderedStart.toISOString()}>{formatTime(renderedStart)}</time>
+            </EventCard.Time>
+            {onEventResize && (
+              <>
+                <div
+                  onPointerDown={stopAndStart(resizeTop.handlers.onPointerDown)}
+                  className="absolute top-0 right-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
+                  aria-label="Resize event start"
+                />
+                <div
+                  onPointerDown={stopAndStart(resizeBottom.handlers.onPointerDown)}
+                  className="absolute right-0 bottom-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
+                  aria-label="Resize event end"
+                />
+              </>
+            )}
+          </EventCard>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          <p className="font-semibold">{event.title}</p>
+          <p className="opacity-80">
+            {formatTime(renderedStart)} – {formatTime(renderedEnd)}
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </li>
+  )
+}
+
+function DayCreatePreview({ start, end }: { start: Date; end: Date }) {
+  const startMinutes = start.getHours() * 60 + start.getMinutes()
+  const durationMinutes = Math.max(5, (end.getTime() - start.getTime()) / 60000)
+  const rowStart = Math.floor(startMinutes / 5) + 2
+  const rowSpan = Math.ceil(durationMinutes / 5)
+  return (
+    <li
+      style={{ gridRow: `${rowStart} / span ${rowSpan}` }}
+      className="pointer-events-none relative mt-px flex"
+    >
+      <div className="absolute inset-1 rounded-lg border-2 border-primary bg-primary/15 px-2 py-1 text-xs font-semibold text-primary">
+        {formatTime(start)} – {formatTime(end)}
+      </div>
+    </li>
   )
 }
 

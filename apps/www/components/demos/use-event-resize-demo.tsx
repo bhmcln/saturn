@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
 import { cn } from '@/registry/default/lib/utils'
+import { useState } from 'react'
 
 const MS_PER_PX = (60 * 1000) / 2
 

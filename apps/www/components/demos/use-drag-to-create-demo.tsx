@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
 import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
 import { cn } from '@/registry/default/lib/utils'
+import { useRef, useState } from 'react'
 
 interface DemoEvent {
   id: string
