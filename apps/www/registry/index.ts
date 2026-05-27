@@ -395,6 +395,8 @@ export const registry: ManifestItem[] = [
       'shift-block',
       'unallocated-row',
       'tooltip',
+      'use-event-drag',
+      'use-event-resize',
     ],
   },
 ]

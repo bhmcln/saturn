@@ -103,8 +103,18 @@ function buildUnallocated(weekStart: Date): RosterUnallocatedTask[] {
 
 export function RosterPlannerDemo() {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
-  const shifts = buildShifts(weekStart)
+  const [shifts, setShifts] = useState<RosterShift[]>(() => buildShifts(weekStart))
   const unallocated = buildUnallocated(weekStart)
+
+  const handleWeekChange = (date: Date) => {
+    const next = startOfWeek(date, { weekStartsOn: 1 })
+    setWeekStart(next)
+    setShifts(buildShifts(next))
+  }
+
+  const updateShift = (id: string, newStart: Date, newEnd: Date) => {
+    setShifts((prev) => prev.map((s) => (s.id === id ? { ...s, start: newStart, end: newEnd } : s)))
+  }
 
   return (
     <RosterPlanner
@@ -113,9 +123,11 @@ export function RosterPlannerDemo() {
       workers={WORKERS}
       shifts={shifts}
       unallocated={unallocated}
-      onWeekChange={(d) => setWeekStart(startOfWeek(d, { weekStartsOn: 1 }))}
+      onWeekChange={handleWeekChange}
       onShiftClick={(s) => console.log('shift', s.id)}
       onTaskClick={(t) => console.log('task', t.id)}
+      onShiftMove={(s, start, end) => updateShift(s.id, start, end)}
+      onShiftResize={(s, start, end) => updateShift(s.id, start, end)}
     />
   )
 }
