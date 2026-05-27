@@ -1,20 +1,24 @@
 import type { ReactNode } from 'react'
+import { ActivityBlockDemo } from './activity-block-demo'
 import { AgendaViewDemo } from './agenda-view-demo'
+import { AvailabilityOverlayDemo } from './availability-overlay-demo'
 import { ButtonDemo } from './button-demo'
 import { DatePickerDemo } from './date-picker-demo'
 import { DateRangePickerDemo } from './date-range-picker-demo'
+import { DayLabelsDemo } from './day-labels-demo'
 import { DayViewDemo } from './day-view-demo'
 import { EventCardDemo } from './event-card-demo'
 import { MiniCalendarDemo } from './mini-calendar-demo'
 import { MonthViewDemo } from './month-view-demo'
 import { NowIndicatorDemo } from './now-indicator-demo'
+import { PeriodBoundaryMarkerDemo } from './period-boundary-marker-demo'
 import { PeriodNavigatorDemo } from './period-navigator-demo'
-import { TimePickerDemo } from './time-picker-demo'
-import { DayLabelsDemo } from './day-labels-demo'
 import { TimeGutterDemo } from './time-gutter-demo'
+import { TimePickerDemo } from './time-picker-demo'
 import { TooltipDemo } from './tooltip-demo'
 import { ViewModeSwitcherDemo } from './view-mode-switcher-demo'
 import { WeekViewDemo } from './week-view-demo'
+import { ZoomControlsDemo } from './zoom-controls-demo'
 
 export interface DemoSpec {
   element: ReactNode
@@ -36,6 +40,16 @@ export const DEMOS: Record<string, DemoSpec> = {
   tooltip: { element: <TooltipDemo />, filename: 'tooltip-demo.tsx' },
   'time-gutter': { element: <TimeGutterDemo />, filename: 'time-gutter-demo.tsx' },
   'day-labels': { element: <DayLabelsDemo />, filename: 'day-labels-demo.tsx' },
+  'activity-block': { element: <ActivityBlockDemo />, filename: 'activity-block-demo.tsx' },
+  'availability-overlay': {
+    element: <AvailabilityOverlayDemo />,
+    filename: 'availability-overlay-demo.tsx',
+  },
+  'zoom-controls': { element: <ZoomControlsDemo />, filename: 'zoom-controls-demo.tsx' },
+  'period-boundary-marker': {
+    element: <PeriodBoundaryMarkerDemo />,
+    filename: 'period-boundary-marker-demo.tsx',
+  },
 
   'week-view': {
     element: <WeekViewDemo />,

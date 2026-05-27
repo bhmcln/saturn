@@ -1,6 +1,6 @@
-import { startOfWeek } from 'date-fns'
-import { DayLabels } from '@/registry/default/ui/day-labels'
 import { getWeekDays } from '@/registry/default/lib/time'
+import { DayLabels } from '@/registry/default/ui/day-labels'
+import { startOfWeek } from 'date-fns'
 
 export function DayLabelsDemo() {
   const days = getWeekDays(startOfWeek(new Date()))

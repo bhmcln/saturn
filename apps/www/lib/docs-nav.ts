@@ -21,6 +21,8 @@ export const docsNav: DocsNavGroup[] = [
     items: [
       { title: 'cn (utils)', href: '/docs/utils' },
       { title: 'Time helpers', href: '/docs/time' },
+      { title: 'Timezone', href: '/docs/timezone' },
+      { title: 'Activity colors', href: '/docs/activity-colors' },
     ],
   },
   {
@@ -29,6 +31,9 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'useControllableState', href: '/docs/use-controllable' },
       { title: 'useNow', href: '/docs/use-now' },
       { title: 'useEventLayout', href: '/docs/use-event-layout' },
+      { title: 'useTimeGrid', href: '/docs/use-time-grid' },
+      { title: 'useZoom', href: '/docs/use-zoom' },
+      { title: 'useKeyboardShortcuts', href: '/docs/use-keyboard-shortcuts' },
     ],
   },
   {
@@ -42,6 +47,10 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'Tooltip', href: '/docs/tooltip' },
       { title: 'Time Gutter', href: '/docs/time-gutter' },
       { title: 'Day Labels', href: '/docs/day-labels' },
+      { title: 'Activity Block', href: '/docs/activity-block' },
+      { title: 'Availability Overlay', href: '/docs/availability-overlay' },
+      { title: 'Zoom Controls', href: '/docs/zoom-controls' },
+      { title: 'Period Boundary Marker', href: '/docs/period-boundary-marker' },
     ],
   },
   {

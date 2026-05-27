@@ -32,6 +32,20 @@ export const registry: ManifestItem[] = [
     files: [{ path: 'lib/time.ts', type: 'registry:lib' }],
     dependencies: ['date-fns'],
   },
+  {
+    name: 'timezone',
+    type: 'registry:lib',
+    description: 'IANA-aware date math — keystone for minute-positioned timeline rendering',
+    files: [{ path: 'lib/timezone.ts', type: 'registry:lib' }],
+    dependencies: ['date-fns', 'date-fns-tz'],
+  },
+  {
+    name: 'activity-colors',
+    type: 'registry:lib',
+    description:
+      'Activity-type → Tailwind class tokens (bg, border, accent, title, meta) for rosters',
+    files: [{ path: 'lib/activity-colors.ts', type: 'registry:lib' }],
+  },
 
   // ─── Foundations (hooks) ────────────────────────────────────────────────
   {
@@ -51,6 +65,24 @@ export const registry: ManifestItem[] = [
     type: 'registry:hook',
     description: 'Column-packs overlapping events into the minimum number of side-by-side columns',
     files: [{ path: 'hooks/use-event-layout.ts', type: 'registry:hook' }],
+  },
+  {
+    name: 'use-time-grid',
+    type: 'registry:hook',
+    description: 'positionRange(start, end, viewport) → offset% + length% for timeline blocks',
+    files: [{ path: 'hooks/use-time-grid.ts', type: 'registry:hook' }],
+  },
+  {
+    name: 'use-zoom',
+    type: 'registry:hook',
+    description: 'Bounded zoom state with zoomIn / zoomOut / reset / fitTo',
+    files: [{ path: 'hooks/use-zoom.ts', type: 'registry:hook' }],
+  },
+  {
+    name: 'use-keyboard-shortcuts',
+    type: 'registry:hook',
+    description: 'ShortcutMap → handlers, ignoring focus in input / textarea / contenteditable',
+    files: [{ path: 'hooks/use-keyboard-shortcuts.ts', type: 'registry:hook' }],
   },
 
   // ─── Primitives (ui) ────────────────────────────────────────────────────
@@ -118,6 +150,36 @@ export const registry: ManifestItem[] = [
     dependencies: ['date-fns'],
     registryDependencies: ['utils'],
   },
+  {
+    name: 'activity-block',
+    type: 'registry:ui',
+    description: 'Positioned block representing one activity (task / travel / break / etc.)',
+    files: [{ path: 'ui/activity-block.tsx', type: 'registry:ui' }],
+    registryDependencies: ['utils', 'activity-colors'],
+  },
+  {
+    name: 'availability-overlay',
+    type: 'registry:ui',
+    description: 'Translucent band marking available / unavailable / off-shift windows',
+    files: [{ path: 'ui/availability-overlay.tsx', type: 'registry:ui' }],
+    dependencies: ['class-variance-authority'],
+    registryDependencies: ['utils'],
+  },
+  {
+    name: 'zoom-controls',
+    type: 'registry:ui',
+    description: 'Zoom out / current% / zoom in / fit toolbar — pair with the use-zoom hook',
+    files: [{ path: 'ui/zoom-controls.tsx', type: 'registry:ui' }],
+    dependencies: ['lucide-react'],
+    registryDependencies: ['utils', 'button', 'tooltip'],
+  },
+  {
+    name: 'period-boundary-marker',
+    type: 'registry:ui',
+    description: 'Vertical line + optional label marking a period boundary in a timeline',
+    files: [{ path: 'ui/period-boundary-marker.tsx', type: 'registry:ui' }],
+    registryDependencies: ['utils'],
+  },
 
   // ─── Views (ui) ─────────────────────────────────────────────────────────
   {
@@ -126,14 +188,7 @@ export const registry: ManifestItem[] = [
     description: 'Seven-day calendar view with time grid and positioned events',
     files: [{ path: 'ui/week-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: [
-      'utils',
-      'time',
-      'event-card',
-      'tooltip',
-      'time-gutter',
-      'day-labels',
-    ],
+    registryDependencies: ['utils', 'time', 'event-card', 'tooltip', 'time-gutter', 'day-labels'],
   },
   {
     name: 'day-view',
