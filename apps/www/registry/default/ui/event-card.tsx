@@ -8,7 +8,7 @@ export const EVENT_COLORS = ['gray', 'blue', 'pink', 'green', 'purple', 'amber']
 export type EventColor = (typeof EVENT_COLORS)[number]
 
 const containerVariants = cva(
-  'group flex flex-col overflow-y-auto rounded-lg p-2 text-xs/5 transition-colors',
+  'group flex flex-col overflow-hidden rounded-lg p-2 text-xs/5 transition-colors',
   {
     variants: {
       color: {
@@ -65,13 +65,16 @@ function EventCardRoot({ className, color = 'gray', children, ...props }: EventC
 function EventCardTitle({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   const color = React.useContext(ColorContext)
   return (
-    <p className={cn('order-1 font-semibold', titleColorClasses[color], className)} {...props} />
+    <p
+      className={cn('order-1 truncate font-semibold', titleColorClasses[color], className)}
+      {...props}
+    />
   )
 }
 
 function EventCardTime({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   const color = React.useContext(ColorContext)
-  return <p className={cn(timeColorClasses[color], className)} {...props} />
+  return <p className={cn('truncate', timeColorClasses[color], className)} {...props} />
 }
 
 export const EventCard = Object.assign(EventCardRoot, {
