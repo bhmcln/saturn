@@ -9,6 +9,7 @@ import { useNow } from '@/registry/default/hooks/use-now'
 import { addDays, eachHourOfDay, formatHour, formatTime } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { EventCard, type EventColor } from '@/registry/default/ui/event-card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/default/ui/tooltip'
 
 export interface CalendarEvent {
   id: string
@@ -203,20 +204,30 @@ function Grid({ className }: { className?: string }) {
                 style={{ gridRow: `${rowStart} / span ${rowSpan}` }}
                 className="relative mt-px flex"
               >
-                <EventCard
-                  color={event.color ?? 'gray'}
-                  onClick={() => onEventClick?.(event)}
-                  style={{
-                    left: `calc(${leftPct}% + 0.25rem)`,
-                    width: `calc(${widthPct}% - 0.5rem)`,
-                  }}
-                  className="absolute top-1 bottom-1 cursor-pointer"
-                >
-                  <EventCard.Title>{event.title}</EventCard.Title>
-                  <EventCard.Time>
-                    <time dateTime={event.start.toISOString()}>{formatTime(event.start)}</time>
-                  </EventCard.Time>
-                </EventCard>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <EventCard
+                      color={event.color ?? 'gray'}
+                      onClick={() => onEventClick?.(event)}
+                      style={{
+                        left: `calc(${leftPct}% + 0.25rem)`,
+                        width: `calc(${widthPct}% - 0.5rem)`,
+                      }}
+                      className="absolute top-1 bottom-1 cursor-pointer"
+                    >
+                      <EventCard.Title>{event.title}</EventCard.Title>
+                      <EventCard.Time>
+                        <time dateTime={event.start.toISOString()}>{formatTime(event.start)}</time>
+                      </EventCard.Time>
+                    </EventCard>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p className="font-semibold">{event.title}</p>
+                    <p className="opacity-80">
+                      {formatTime(event.start)} – {formatTime(event.end)}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </li>
             )
           })}

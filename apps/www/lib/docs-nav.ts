@@ -39,6 +39,7 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'Now Indicator', href: '/docs/now-indicator' },
       { title: 'View Mode Switcher', href: '/docs/view-mode-switcher' },
       { title: 'Mini Calendar', href: '/docs/mini-calendar' },
+      { title: 'Tooltip', href: '/docs/tooltip' },
     ],
   },
   {

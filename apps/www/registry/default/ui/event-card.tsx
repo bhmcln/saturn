@@ -50,12 +50,14 @@ const ColorContext = React.createContext<EventColor>('gray')
 
 interface EventCardRootProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'color'>,
-    VariantProps<typeof containerVariants> {}
+    VariantProps<typeof containerVariants> {
+  ref?: React.Ref<HTMLDivElement>
+}
 
-function EventCardRoot({ className, color = 'gray', children, ...props }: EventCardRootProps) {
+function EventCardRoot({ className, color = 'gray', children, ref, ...props }: EventCardRootProps) {
   return (
     <ColorContext.Provider value={color ?? 'gray'}>
-      <div className={cn(containerVariants({ color }), className)} {...props}>
+      <div ref={ref} className={cn(containerVariants({ color }), className)} {...props}>
         {children}
       </div>
     </ColorContext.Provider>
@@ -66,7 +68,7 @@ function EventCardTitle({ className, ...props }: React.HTMLAttributes<HTMLParagr
   const color = React.useContext(ColorContext)
   return (
     <p
-      className={cn('order-1 truncate font-semibold', titleColorClasses[color], className)}
+      className={cn('order-1 line-clamp-2 font-semibold', titleColorClasses[color], className)}
       {...props}
     />
   )

@@ -94,6 +94,15 @@ export const registry: ManifestItem[] = [
     dependencies: ['react-day-picker', 'lucide-react'],
     registryDependencies: ['utils', 'button'],
   },
+  {
+    name: 'tooltip',
+    type: 'registry:ui',
+    description:
+      'Radix-based tooltip with TooltipProvider, Tooltip, TooltipTrigger, TooltipContent',
+    files: [{ path: 'ui/tooltip.tsx', type: 'registry:ui' }],
+    dependencies: ['@radix-ui/react-tooltip'],
+    registryDependencies: ['utils'],
+  },
 
   // ─── Views (ui) ─────────────────────────────────────────────────────────
   {
@@ -102,7 +111,7 @@ export const registry: ManifestItem[] = [
     description: 'Seven-day calendar view with time grid and positioned events',
     files: [{ path: 'ui/week-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: ['utils', 'time', 'event-card'],
+    registryDependencies: ['utils', 'time', 'event-card', 'tooltip'],
   },
   {
     name: 'day-view',
@@ -110,7 +119,7 @@ export const registry: ManifestItem[] = [
     description: 'Single-day calendar grid with positioned events and a now-line',
     files: [{ path: 'ui/day-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: ['utils', 'time', 'event-card', 'use-event-layout', 'use-now'],
+    registryDependencies: ['utils', 'time', 'event-card', 'tooltip', 'use-event-layout', 'use-now'],
   },
   {
     name: 'month-view',
@@ -118,7 +127,7 @@ export const registry: ManifestItem[] = [
     description: 'Six-week calendar grid with day cells and "+N more" overflow',
     files: [{ path: 'ui/month-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: ['utils', 'time', 'event-card'],
+    registryDependencies: ['utils', 'time', 'event-card', 'tooltip'],
   },
   {
     name: 'agenda-view',

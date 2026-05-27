@@ -14,6 +14,7 @@ import {
 } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { EventCard, type EventColor } from '@/registry/default/ui/event-card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/default/ui/tooltip'
 
 export interface CalendarEvent {
   id: string
@@ -268,16 +269,26 @@ function Events({ children }: EventsProps) {
             {children ? (
               children(event)
             ) : (
-              <EventCard
-                color={event.color ?? 'gray'}
-                className="absolute inset-1 cursor-pointer"
-                onClick={() => onEventClick?.(event)}
-              >
-                <EventCard.Title>{event.title}</EventCard.Title>
-                <EventCard.Time>
-                  <time dateTime={event.start.toISOString()}>{formatTime(event.start)}</time>
-                </EventCard.Time>
-              </EventCard>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <EventCard
+                    color={event.color ?? 'gray'}
+                    className="absolute inset-1 cursor-pointer"
+                    onClick={() => onEventClick?.(event)}
+                  >
+                    <EventCard.Title>{event.title}</EventCard.Title>
+                    <EventCard.Time>
+                      <time dateTime={event.start.toISOString()}>{formatTime(event.start)}</time>
+                    </EventCard.Time>
+                  </EventCard>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p className="font-semibold">{event.title}</p>
+                  <p className="opacity-80">
+                    {formatTime(event.start)} – {formatTime(event.end)}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             )}
           </li>
         )

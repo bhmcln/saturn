@@ -10,6 +10,7 @@ import { MonthViewDemo } from './month-view-demo'
 import { NowIndicatorDemo } from './now-indicator-demo'
 import { PeriodNavigatorDemo } from './period-navigator-demo'
 import { TimePickerDemo } from './time-picker-demo'
+import { TooltipDemo } from './tooltip-demo'
 import { ViewModeSwitcherDemo } from './view-mode-switcher-demo'
 import { WeekViewDemo } from './week-view-demo'
 
@@ -30,6 +31,7 @@ export const DEMOS: Record<string, DemoSpec> = {
     filename: 'view-mode-switcher-demo.tsx',
   },
   'mini-calendar': { element: <MiniCalendarDemo />, filename: 'mini-calendar-demo.tsx' },
+  tooltip: { element: <TooltipDemo />, filename: 'tooltip-demo.tsx' },
 
   'week-view': {
     element: <WeekViewDemo />,

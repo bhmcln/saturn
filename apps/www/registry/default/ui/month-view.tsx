@@ -7,6 +7,7 @@ import * as React from 'react'
 import { type WeekStartsOn, getMonthGrid } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import type { EventColor } from '@/registry/default/ui/event-card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/default/ui/tooltip'
 
 export interface CalendarEvent {
   id: string
@@ -221,32 +222,38 @@ function Grid({ maxEventsPerDay = 3, className }: GridProps) {
             <ol className="mt-auto flex flex-col gap-0.5">
               {visible.map((event) => {
                 const eventColor = event.color ?? 'gray'
-                const inner = (
-                  <>
-                    <span
-                      className={cn('size-1.5 shrink-0 rounded-full', EVENT_COLOR_DOT[eventColor])}
-                    />
-                    <span className="truncate">{event.title}</span>
-                  </>
+                const dot = (
+                  <span
+                    className={cn('size-1.5 shrink-0 rounded-full', EVENT_COLOR_DOT[eventColor])}
+                  />
+                )
+                const label = <span className="truncate">{event.title}</span>
+                const inner = onEventClick ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onEventClick(event)
+                    }}
+                    className="flex w-full items-center gap-1.5 truncate text-left text-foreground hover:underline"
+                  >
+                    {dot}
+                    {label}
+                  </button>
+                ) : (
+                  <span className="flex w-full items-center gap-1.5 truncate text-foreground">
+                    {dot}
+                    {label}
+                  </span>
                 )
                 return (
-                  <li key={event.id}>
-                    {onEventClick ? (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onEventClick(event)
-                        }}
-                        className="flex w-full items-center gap-1.5 truncate text-left text-foreground hover:underline"
-                      >
-                        {inner}
-                      </button>
-                    ) : (
-                      <span className="flex items-center gap-1.5 truncate text-foreground">
-                        {inner}
-                      </span>
-                    )}
+                  <li key={event.id} className="min-w-0">
+                    <Tooltip>
+                      <TooltipTrigger asChild>{inner}</TooltipTrigger>
+                      <TooltipContent side="top">
+                        <p className="font-semibold">{event.title}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </li>
                 )
               })}
