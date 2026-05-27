@@ -230,6 +230,29 @@ export const registry: ManifestItem[] = [
     dependencies: ['@radix-ui/react-popover', 'date-fns', 'lucide-react'],
     registryDependencies: ['utils', 'button', 'mini-calendar'],
   },
+  {
+    name: 'timeline-view',
+    type: 'registry:ui',
+    description: 'Horizontal-time × vertical-resource view — the rostering chassis',
+    files: [{ path: 'ui/timeline-view.tsx', type: 'registry:ui' }],
+    dependencies: ['date-fns'],
+    registryDependencies: ['utils', 'use-time-grid'],
+  },
+  {
+    name: 'resource-row',
+    type: 'registry:ui',
+    description: 'Single row with sticky-left label + positioned blocks on the track',
+    files: [{ path: 'ui/resource-row.tsx', type: 'registry:ui' }],
+    registryDependencies: ['utils', 'timeline-view'],
+  },
+  {
+    name: 'swimlane-view',
+    type: 'registry:ui',
+    description: 'Grouped section of resource-rows with a shared header (optionally collapsible)',
+    files: [{ path: 'ui/swimlane-view.tsx', type: 'registry:ui' }],
+    dependencies: ['lucide-react'],
+    registryDependencies: ['utils'],
+  },
 
   // ─── Inputs (ui) ────────────────────────────────────────────────────────
   {

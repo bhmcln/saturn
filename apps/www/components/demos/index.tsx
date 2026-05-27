@@ -13,8 +13,11 @@ import { MonthViewDemo } from './month-view-demo'
 import { NowIndicatorDemo } from './now-indicator-demo'
 import { PeriodBoundaryMarkerDemo } from './period-boundary-marker-demo'
 import { PeriodNavigatorDemo } from './period-navigator-demo'
+import { ResourceRowDemo } from './resource-row-demo'
+import { SwimlaneViewDemo } from './swimlane-view-demo'
 import { TimeGutterDemo } from './time-gutter-demo'
 import { TimePickerDemo } from './time-picker-demo'
+import { TimelineViewDemo } from './timeline-view-demo'
 import { TooltipDemo } from './tooltip-demo'
 import { ViewModeSwitcherDemo } from './view-mode-switcher-demo'
 import { WeekViewDemo } from './week-view-demo'
@@ -74,6 +77,21 @@ export const DEMOS: Record<string, DemoSpec> = {
   'period-navigator': {
     element: <PeriodNavigatorDemo />,
     filename: 'period-navigator-demo.tsx',
+  },
+  'timeline-view': {
+    element: <TimelineViewDemo />,
+    filename: 'timeline-view-demo.tsx',
+    previewClassName: 'block h-[520px] p-0 min-h-0',
+  },
+  'resource-row': {
+    element: <ResourceRowDemo />,
+    filename: 'resource-row-demo.tsx',
+    previewClassName: 'block h-[220px] p-0 min-h-0',
+  },
+  'swimlane-view': {
+    element: <SwimlaneViewDemo />,
+    filename: 'swimlane-view-demo.tsx',
+    previewClassName: 'block h-[520px] p-0 min-h-0',
   },
 
   'date-picker': { element: <DatePickerDemo />, filename: 'date-picker-demo.tsx' },

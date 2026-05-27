@@ -61,6 +61,9 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'Month View', href: '/docs/month-view' },
       { title: 'Agenda View', href: '/docs/agenda-view' },
       { title: 'Period Navigator', href: '/docs/period-navigator' },
+      { title: 'Timeline View', href: '/docs/timeline-view' },
+      { title: 'Resource Row', href: '/docs/resource-row' },
+      { title: 'Swimlane View', href: '/docs/swimlane-view' },
     ],
   },
   {
