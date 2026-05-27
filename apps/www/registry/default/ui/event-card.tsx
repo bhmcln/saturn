@@ -1,3 +1,5 @@
+'use client'
+
 import { cn } from '@/registry/default/lib/utils'
 import { type VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
