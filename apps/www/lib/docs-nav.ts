@@ -56,6 +56,8 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'Availability Overlay', href: '/docs/availability-overlay' },
       { title: 'Zoom Controls', href: '/docs/zoom-controls' },
       { title: 'Period Boundary Marker', href: '/docs/period-boundary-marker' },
+      { title: 'Shift Block', href: '/docs/shift-block' },
+      { title: 'Unallocated Row', href: '/docs/unallocated-row' },
     ],
   },
   {
@@ -80,5 +82,9 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'Date Range Picker', href: '/docs/date-range-picker' },
       { title: 'Time Picker', href: '/docs/time-picker' },
     ],
+  },
+  {
+    title: 'Blocks',
+    items: [{ title: 'Roster Planner', href: '/docs/roster-planner' }],
   },
 ]

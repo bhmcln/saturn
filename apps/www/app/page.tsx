@@ -1,6 +1,7 @@
 import { Announcement } from '@/components/announcement'
 import { CodeBlock } from '@/components/code-block'
 import { CalendarDemo } from '@/components/demos/calendar-demo'
+import { RosterPlannerDemo } from '@/components/demos/roster-planner-demo'
 import { TimelineViewDemo } from '@/components/demos/timeline-view-demo'
 import {
   PageActions,
@@ -16,16 +17,16 @@ export default function HomePage() {
   return (
     <>
       <PageHeader>
-        <Announcement>v0.4 · Drag to move, resize, and create</Announcement>
+        <Announcement>v0.5 · Roster planner</Announcement>
         <PageHeaderHeading>Time-based UI, the way you would have built it.</PageHeaderHeading>
         <PageHeaderDescription>
-          A shadcn/ui-style library of day, week, month, and timeline views with drag-to-
-          reschedule, edge resize, and drag-to-create baked in. Copy the source you need, own the
-          code, theme it your way.
+          A shadcn/ui-style library for rostering, scheduling, and time-based UI. Drag, resize, and
+          create across day / week / month / timeline views. Copy the source you need, own the code,
+          theme it your way.
         </PageHeaderDescription>
         <PageActions>
-          <Link href="/docs/timeline-view" className={buttonVariants()}>
-            Browse components
+          <Link href="/docs/roster-planner" className={buttonVariants()}>
+            See the roster planner
             <ArrowRight className="size-4" />
           </Link>
           <Link
@@ -40,6 +41,17 @@ export default function HomePage() {
       </PageHeader>
 
       <section className="container space-y-10 py-10">
+        <div>
+          <h2 className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
+            Roster planner — a whole team's week at a glance
+          </h2>
+          <div className="overflow-hidden rounded-xl border bg-card">
+            <div className="h-[720px]">
+              <RosterPlannerDemo />
+            </div>
+          </div>
+        </div>
+
         <div>
           <h2 className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
             Calendar — one person's week
@@ -69,7 +81,7 @@ export default function HomePage() {
         </h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <CodeBlock>npx saturn init</CodeBlock>
-          <CodeBlock>npx saturn add timeline-view</CodeBlock>
+          <CodeBlock>npx saturn add roster-planner</CodeBlock>
         </div>
       </section>
     </>

@@ -214,6 +214,20 @@ export const registry: ManifestItem[] = [
     files: [{ path: 'ui/period-boundary-marker.tsx', type: 'registry:ui' }],
     registryDependencies: ['utils'],
   },
+  {
+    name: 'shift-block',
+    type: 'registry:ui',
+    description: 'Worker-shift pill with a colored accent bar showing per-activity segments',
+    files: [{ path: 'ui/shift-block.tsx', type: 'registry:ui' }],
+    registryDependencies: ['utils', 'activity-colors'],
+  },
+  {
+    name: 'unallocated-row',
+    type: 'registry:ui',
+    description: 'Sticky-bottom row that surfaces tasks not yet assigned to a worker',
+    files: [{ path: 'ui/unallocated-row.tsx', type: 'registry:ui' }],
+    registryDependencies: ['utils'],
+  },
 
   // ─── Views (ui) ─────────────────────────────────────────────────────────
   {
@@ -364,5 +378,23 @@ export const registry: ManifestItem[] = [
     files: [{ path: 'ui/time-picker.tsx', type: 'registry:ui' }],
     dependencies: ['lucide-react'],
     registryDependencies: ['utils', 'use-controllable'],
+  },
+
+  // ─── Blocks (registry:block) ────────────────────────────────────────────
+  {
+    name: 'roster-planner',
+    type: 'registry:block',
+    description:
+      'Week × workers roster with shift blocks, sticky labels, unallocated row — Saturn flagship',
+    files: [{ path: 'blocks/roster-planner.tsx', type: 'registry:block' }],
+    dependencies: ['date-fns', 'lucide-react'],
+    registryDependencies: [
+      'utils',
+      'time',
+      'day-labels',
+      'shift-block',
+      'unallocated-row',
+      'tooltip',
+    ],
   },
 ]

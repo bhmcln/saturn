@@ -15,11 +15,14 @@ import { NowIndicatorDemo } from './now-indicator-demo'
 import { PeriodBoundaryMarkerDemo } from './period-boundary-marker-demo'
 import { PeriodNavigatorDemo } from './period-navigator-demo'
 import { ResourceRowDemo } from './resource-row-demo'
+import { RosterPlannerDemo } from './roster-planner-demo'
+import { ShiftBlockDemo } from './shift-block-demo'
 import { SwimlaneViewDemo } from './swimlane-view-demo'
 import { TimeGutterDemo } from './time-gutter-demo'
 import { TimePickerDemo } from './time-picker-demo'
 import { TimelineViewDemo } from './timeline-view-demo'
 import { TooltipDemo } from './tooltip-demo'
+import { UnallocatedRowDemo } from './unallocated-row-demo'
 import { UseDragToCreateDemo } from './use-drag-to-create-demo'
 import { UseEventDragDemo } from './use-event-drag-demo'
 import { UseEventResizeDemo } from './use-event-resize-demo'
@@ -117,6 +120,16 @@ export const DEMOS: Record<string, DemoSpec> = {
   'time-picker': { element: <TimePickerDemo />, filename: 'time-picker-demo.tsx' },
   'use-event-drag': { element: <UseEventDragDemo />, filename: 'use-event-drag-demo.tsx' },
   'use-event-resize': { element: <UseEventResizeDemo />, filename: 'use-event-resize-demo.tsx' },
+  'shift-block': { element: <ShiftBlockDemo />, filename: 'shift-block-demo.tsx' },
+  'unallocated-row': {
+    element: <UnallocatedRowDemo />,
+    filename: 'unallocated-row-demo.tsx',
+  },
+  'roster-planner': {
+    element: <RosterPlannerDemo />,
+    filename: 'roster-planner-demo.tsx',
+    previewClassName: 'block h-[720px] p-0 min-h-0',
+  },
   'use-drag-to-create': {
     element: <UseDragToCreateDemo />,
     filename: 'use-drag-to-create-demo.tsx',
