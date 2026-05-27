@@ -3,33 +3,163 @@
 import { type CalendarEvent, WeekView } from '@/registry/default/ui/week-view'
 import { useState } from 'react'
 
-function makeEvents(anchor: Date): CalendarEvent[] {
-  const day = (offset: number, h: number, m: number) => {
+/**
+ * A care-worker's rostered week. Each event reads as a visit, travel
+ * block, break, or admin task — the kind of shape Saturn is built around.
+ */
+function makeRoster(anchor: Date): CalendarEvent[] {
+  const at = (offset: number, h: number, m: number) => {
     const d = new Date(anchor)
     d.setDate(d.getDate() + offset)
     d.setHours(h, m, 0, 0)
     return d
   }
   return [
-    { id: '1', title: 'Standup', start: day(0, 9, 0), end: day(0, 9, 30), color: 'blue' },
-    { id: '2', title: 'Design review', start: day(0, 10, 0), end: day(0, 11, 30), color: 'pink' },
-    { id: '3', title: 'Lunch w/ Lena', start: day(1, 12, 30), end: day(1, 13, 30), color: 'amber' },
-    { id: '4', title: 'Roster planning', start: day(2, 14, 0), end: day(2, 16, 0), color: 'green' },
-    { id: '5', title: 'Shift handover', start: day(3, 8, 0), end: day(3, 9, 0), color: 'purple' },
-    { id: '6', title: 'Customer demo', start: day(4, 15, 0), end: day(4, 16, 0), color: 'blue' },
+    // Monday
+    {
+      id: 'm1',
+      title: 'Mrs Patel · Personal care',
+      start: at(0, 7, 30),
+      end: at(0, 8, 30),
+      color: 'blue',
+    },
+    { id: 'm2', title: 'Travel', start: at(0, 8, 30), end: at(0, 9, 0), color: 'gray' },
+    {
+      id: 'm3',
+      title: 'Mr Chen · Medication',
+      start: at(0, 9, 0),
+      end: at(0, 9, 45),
+      color: 'green',
+    },
+    {
+      id: 'm4',
+      title: 'Mrs Okafor · Domestic',
+      start: at(0, 11, 0),
+      end: at(0, 12, 30),
+      color: 'blue',
+    },
+    { id: 'm5', title: 'Lunch', start: at(0, 12, 30), end: at(0, 13, 30), color: 'amber' },
+    {
+      id: 'm6',
+      title: 'Mr Davies · Wound care',
+      start: at(0, 14, 0),
+      end: at(0, 15, 0),
+      color: 'pink',
+    },
+
+    // Tuesday
+    {
+      id: 't1',
+      title: 'Mrs Patel · Personal care',
+      start: at(1, 7, 30),
+      end: at(1, 8, 30),
+      color: 'blue',
+    },
+    { id: 't2', title: 'Team huddle', start: at(1, 9, 0), end: at(1, 9, 30), color: 'purple' },
+    {
+      id: 't3',
+      title: 'Mr Davies · Wound care',
+      start: at(1, 10, 0),
+      end: at(1, 11, 0),
+      color: 'pink',
+    },
+    {
+      id: 't4',
+      title: 'Mrs Liu · Social support',
+      start: at(1, 14, 0),
+      end: at(1, 15, 30),
+      color: 'blue',
+    },
+
+    // Wednesday — training morning
+    {
+      id: 'w1',
+      title: 'CPR refresher · Training',
+      start: at(2, 9, 0),
+      end: at(2, 12, 0),
+      color: 'purple',
+    },
+    {
+      id: 'w2',
+      title: 'Mrs Okafor · Domestic',
+      start: at(2, 14, 0),
+      end: at(2, 15, 30),
+      color: 'blue',
+    },
+
+    // Thursday
+    {
+      id: 'th1',
+      title: 'Mr Chen · Medication',
+      start: at(3, 8, 0),
+      end: at(3, 8, 45),
+      color: 'green',
+    },
+    {
+      id: 'th2',
+      title: 'Mrs Patel · Personal care',
+      start: at(3, 9, 30),
+      end: at(3, 10, 30),
+      color: 'blue',
+    },
+    {
+      id: 'th3',
+      title: 'Mr Davies · Wound care',
+      start: at(3, 11, 0),
+      end: at(3, 12, 0),
+      color: 'pink',
+    },
+    { id: 'th4', title: 'Lunch', start: at(3, 12, 30), end: at(3, 13, 30), color: 'amber' },
+    {
+      id: 'th5',
+      title: 'Mrs Liu · Social support',
+      start: at(3, 14, 0),
+      end: at(3, 15, 0),
+      color: 'blue',
+    },
+
+    // Friday
+    {
+      id: 'f1',
+      title: 'Mrs Patel · Personal care',
+      start: at(4, 7, 30),
+      end: at(4, 8, 30),
+      color: 'blue',
+    },
+    {
+      id: 'f2',
+      title: 'Mr Chen · Medication',
+      start: at(4, 9, 0),
+      end: at(4, 9, 45),
+      color: 'green',
+    },
+    {
+      id: 'f3',
+      title: 'Mrs Okafor · Domestic',
+      start: at(4, 10, 30),
+      end: at(4, 12, 0),
+      color: 'blue',
+    },
+    {
+      id: 'f4',
+      title: 'Handover · Branch office',
+      start: at(4, 16, 0),
+      end: at(4, 17, 0),
+      color: 'purple',
+    },
   ]
 }
 
 export function WeekViewDemo() {
   const [date, setDate] = useState(() => new Date())
-  const events = makeEvents(date)
+  const events = makeRoster(date)
 
   return (
     <WeekView
       date={date}
       onDateChange={setDate}
       events={events}
-      onEventClick={(e) => console.log('clicked', e)}
+      onEventClick={(e) => console.log('visit clicked', e)}
     >
       <WeekView.Header>
         <WeekView.Title />
