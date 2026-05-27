@@ -165,6 +165,11 @@ export function WeekViewDemo() {
           current.map((e) => (e.id === event.id ? { ...e, start: newStart, end: newEnd } : e)),
         )
       }}
+      onEventResize={(event, newStart, newEnd) => {
+        setEvents((current) =>
+          current.map((e) => (e.id === event.id ? { ...e, start: newStart, end: newEnd } : e)),
+        )
+      }}
     >
       <WeekView.Header>
         <WeekView.Title />

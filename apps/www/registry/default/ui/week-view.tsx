@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
+import { useEventResize } from '@/registry/default/hooks/use-event-resize'
 import { type WeekStartsOn, addDays, formatTime, getWeekDays } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { DayLabels as DayLabelsPrimitive } from '@/registry/default/ui/day-labels'
@@ -29,6 +30,7 @@ interface WeekViewContextValue {
   onDateChange?: (date: Date) => void
   onEventClick?: (event: CalendarEvent) => void
   onEventMove?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
 }
 
 const WeekViewContext = React.createContext<WeekViewContextValue | null>(null)
@@ -52,6 +54,11 @@ export interface WeekViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>
    * snapping (15 min default). Set to enable drag-to-reschedule.
    */
   onEventMove?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
+  /**
+   * Fired when the user resizes an event by dragging its top or bottom edge.
+   * Set to enable resize handles.
+   */
+  onEventResize?: (event: CalendarEvent, newStart: Date, newEnd: Date) => void
 }
 
 function WeekViewRoot({
@@ -61,14 +68,33 @@ function WeekViewRoot({
   onDateChange,
   onEventClick,
   onEventMove,
+  onEventResize,
   className,
   children,
   ...props
 }: WeekViewProps) {
   const weekDays = React.useMemo(() => getWeekDays(date, { weekStartsOn }), [date, weekStartsOn])
   const value = React.useMemo<WeekViewContextValue>(
-    () => ({ date, weekDays, weekStartsOn, events, onDateChange, onEventClick, onEventMove }),
-    [date, weekDays, weekStartsOn, events, onDateChange, onEventClick, onEventMove],
+    () => ({
+      date,
+      weekDays,
+      weekStartsOn,
+      events,
+      onDateChange,
+      onEventClick,
+      onEventMove,
+      onEventResize,
+    }),
+    [
+      date,
+      weekDays,
+      weekStartsOn,
+      events,
+      onDateChange,
+      onEventClick,
+      onEventMove,
+      onEventResize,
+    ],
   )
   return (
     <WeekViewContext.Provider value={value}>
@@ -244,23 +270,33 @@ const HEADER_OFFSET_PX = 28 // 1.75rem
 const MS_PER_DAY = 86_400_000
 
 function EventItem({ event, dayIndex, dayCount, containerRef, renderItem }: EventItemProps) {
-  const { onEventClick, onEventMove } = useWeekView()
+  const { onEventClick, onEventMove, onEventResize } = useWeekView()
   const [dragMs, setDragMs] = React.useState(0)
+  const [resizeTopMs, setResizeTopMs] = React.useState(0)
+  const [resizeBottomMs, setResizeBottomMs] = React.useState(0)
   const justDraggedAt = React.useRef(0)
+
+  /** Vertical px → ms for this view's geometry. */
+  const verticalMsPerPx = (): number => {
+    const el = containerRef.current
+    if (!el) return 0
+    const rect = el.getBoundingClientRect()
+    const timeHeight = rect.height - HEADER_OFFSET_PX
+    if (timeHeight <= 0) return 0
+    return (24 * 60 * 60 * 1000) / timeHeight
+  }
 
   const { isDragging, handlers } = useEventDrag({
     disabled: !onEventMove,
     snapMinutes: 15,
     getDelta(dx, dy) {
+      const ms = verticalMsPerPx()
+      if (ms === 0) return 0
       const el = containerRef.current
       if (!el) return 0
-      const rect = el.getBoundingClientRect()
-      const timeHeight = rect.height - HEADER_OFFSET_PX
-      if (timeHeight <= 0) return 0
-      const msPerPx = (24 * 60 * 60 * 1000) / timeHeight
-      const dayPx = rect.width / dayCount
+      const dayPx = el.getBoundingClientRect().width / dayCount
       const dayDelta = dayPx > 0 ? Math.round(dx / dayPx) : 0
-      return dy * msPerPx + dayDelta * MS_PER_DAY
+      return dy * ms + dayDelta * MS_PER_DAY
     },
     onDrag: setDragMs,
     onMove(delta) {
@@ -273,20 +309,60 @@ function EventItem({ event, dayIndex, dayCount, containerRef, renderItem }: Even
     },
   })
 
-  const renderedStart = new Date(event.start.getTime() + dragMs)
-  const renderedEnd = new Date(event.end.getTime() + dragMs)
+  const resizeTop = useEventResize({
+    edge: 'top',
+    disabled: !onEventResize,
+    snapMinutes: 15,
+    getDelta: (_dx, dy) => dy * verticalMsPerPx(),
+    onDragging: setResizeTopMs,
+    onResize(delta) {
+      setResizeTopMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventResize) return
+      const newStart = new Date(event.start.getTime() + delta)
+      if (newStart >= event.end) return
+      onEventResize(event, newStart, event.end)
+    },
+  })
+
+  const resizeBottom = useEventResize({
+    edge: 'bottom',
+    disabled: !onEventResize,
+    snapMinutes: 15,
+    getDelta: (_dx, dy) => dy * verticalMsPerPx(),
+    onDragging: setResizeBottomMs,
+    onResize(delta) {
+      setResizeBottomMs(0)
+      justDraggedAt.current = Date.now()
+      if (!onEventResize) return
+      const newEnd = new Date(event.end.getTime() + delta)
+      if (newEnd <= event.start) return
+      onEventResize(event, event.start, newEnd)
+    },
+  })
+
+  const renderedStart = new Date(event.start.getTime() + dragMs + resizeTopMs)
+  const renderedEnd = new Date(event.end.getTime() + dragMs + resizeBottomMs)
   const startMinutes = renderedStart.getHours() * 60 + renderedStart.getMinutes()
   const durationMinutes = Math.max(5, (renderedEnd.getTime() - renderedStart.getTime()) / 60000)
   const rowStart = Math.floor(startMinutes / 5) + 2
   const rowSpan = Math.ceil(durationMinutes / 5)
   const dayDelta = Math.floor(dragMs / MS_PER_DAY)
   const renderedDay = Math.max(0, Math.min(dayCount - 1, dayIndex + dayDelta))
+  const isInteracting = isDragging || resizeTop.isResizing || resizeBottom.isResizing
 
   const handleClick = () => {
-    // Suppress click if a drag just completed.
+    // Suppress click if a drag/resize just completed.
     if (Date.now() - justDraggedAt.current < 200) return
     onEventClick?.(event)
   }
+
+  const stopAndStart =
+    (h: (event: React.PointerEvent<HTMLElement>) => void) =>
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation()
+      h(event)
+    }
 
   return (
     <li
@@ -296,20 +372,20 @@ function EventItem({ event, dayIndex, dayCount, containerRef, renderItem }: Even
       }}
       className={cn(
         'relative mt-px flex dark:before:pointer-events-none dark:before:absolute dark:before:inset-1 dark:before:z-0 dark:before:rounded-lg dark:before:bg-background',
-        isDragging && 'z-30',
+        isInteracting && 'z-30',
       )}
     >
       {renderItem ? (
         renderItem(event)
       ) : (
-        <Tooltip open={isDragging ? false : undefined}>
+        <Tooltip open={isInteracting ? false : undefined}>
           <TooltipTrigger asChild>
             <EventCard
               color={event.color ?? 'gray'}
               className={cn(
-                'absolute inset-1 touch-none select-none',
+                'group/event absolute inset-1 touch-none select-none',
                 onEventMove ? 'cursor-grab' : 'cursor-pointer',
-                isDragging && 'cursor-grabbing shadow-lg ring-2 ring-primary/60',
+                isInteracting && 'cursor-grabbing shadow-lg ring-2 ring-primary/60',
               )}
               onClick={handleClick}
               {...handlers}
@@ -318,6 +394,20 @@ function EventItem({ event, dayIndex, dayCount, containerRef, renderItem }: Even
               <EventCard.Time>
                 <time dateTime={renderedStart.toISOString()}>{formatTime(renderedStart)}</time>
               </EventCard.Time>
+              {onEventResize && (
+                <>
+                  <div
+                    onPointerDown={stopAndStart(resizeTop.handlers.onPointerDown)}
+                    className="absolute top-0 right-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
+                    aria-label="Resize event start"
+                  />
+                  <div
+                    onPointerDown={stopAndStart(resizeBottom.handlers.onPointerDown)}
+                    className="absolute right-0 bottom-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
+                    aria-label="Resize event end"
+                  />
+                </>
+              )}
             </EventCard>
           </TooltipTrigger>
           <TooltipContent side="top">

@@ -91,6 +91,13 @@ export const registry: ManifestItem[] = [
       'Pointer-events drag handler that snaps to a minute increment — wire to onEventMove',
     files: [{ path: 'hooks/use-event-drag.ts', type: 'registry:hook' }],
   },
+  {
+    name: 'use-event-resize',
+    type: 'registry:hook',
+    description: 'Thin wrapper over use-event-drag for resize handles on event blocks',
+    files: [{ path: 'hooks/use-event-resize.ts', type: 'registry:hook' }],
+    registryDependencies: ['use-event-drag'],
+  },
 
   // ─── Primitives (ui) ────────────────────────────────────────────────────
   {
@@ -203,6 +210,7 @@ export const registry: ManifestItem[] = [
       'time-gutter',
       'day-labels',
       'use-event-drag',
+      'use-event-resize',
     ],
   },
   {

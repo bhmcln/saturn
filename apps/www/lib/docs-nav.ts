@@ -35,6 +35,7 @@ export const docsNav: DocsNavGroup[] = [
       { title: 'useZoom', href: '/docs/use-zoom' },
       { title: 'useKeyboardShortcuts', href: '/docs/use-keyboard-shortcuts' },
       { title: 'useEventDrag', href: '/docs/use-event-drag' },
+      { title: 'useEventResize', href: '/docs/use-event-resize' },
     ],
   },
   {
