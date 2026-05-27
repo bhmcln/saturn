@@ -15,6 +15,7 @@ import { NowIndicatorDemo } from './now-indicator-demo'
 import { PeriodBoundaryMarkerDemo } from './period-boundary-marker-demo'
 import { PeriodNavigatorDemo } from './period-navigator-demo'
 import { ResourceRowDemo } from './resource-row-demo'
+import { RosterDayDetailDemo } from './roster-day-detail-demo'
 import { RosterPlannerDemo } from './roster-planner-demo'
 import { ShiftBlockDemo } from './shift-block-demo'
 import { SwimlaneViewDemo } from './swimlane-view-demo'
@@ -129,6 +130,11 @@ export const DEMOS: Record<string, DemoSpec> = {
     element: <RosterPlannerDemo />,
     filename: 'roster-planner-demo.tsx',
     previewClassName: 'block h-[720px] p-0 min-h-0',
+  },
+  'roster-day-detail': {
+    element: <RosterDayDetailDemo />,
+    filename: 'roster-day-detail-demo.tsx',
+    previewClassName: 'block h-[640px] p-0 min-h-0',
   },
   'use-drag-to-create': {
     element: <UseDragToCreateDemo />,

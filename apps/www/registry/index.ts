@@ -399,4 +399,19 @@ export const registry: ManifestItem[] = [
       'use-event-resize',
     ],
   },
+  {
+    name: 'roster-day-detail',
+    type: 'registry:block',
+    description:
+      'One day across all workers as horizontal timelines — drill-down view for the roster planner',
+    files: [{ path: 'blocks/roster-day-detail.tsx', type: 'registry:block' }],
+    dependencies: ['date-fns', 'lucide-react'],
+    registryDependencies: [
+      'utils',
+      'activity-colors',
+      'activity-block',
+      'resource-row',
+      'timeline-view',
+    ],
+  },
 ]
