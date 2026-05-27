@@ -104,6 +104,13 @@ export const registry: ManifestItem[] = [
     description: 'Pointer-down on empty grid + drag to define a new event range',
     files: [{ path: 'hooks/use-drag-to-create.ts', type: 'registry:hook' }],
   },
+  {
+    name: 'use-drag-autoscroll',
+    type: 'registry:hook',
+    description:
+      'Auto-scrolls the nearest scrollable ancestor when the pointer is near its edge during a drag',
+    files: [{ path: 'hooks/use-drag-autoscroll.ts', type: 'registry:hook' }],
+  },
 
   // ─── Primitives (ui) ────────────────────────────────────────────────────
   {
@@ -218,6 +225,7 @@ export const registry: ManifestItem[] = [
       'use-event-drag',
       'use-event-resize',
       'use-drag-to-create',
+      'use-drag-autoscroll',
     ],
   },
   {
@@ -237,6 +245,7 @@ export const registry: ManifestItem[] = [
       'use-event-drag',
       'use-event-resize',
       'use-drag-to-create',
+      'use-drag-autoscroll',
     ],
   },
   {
@@ -282,6 +291,7 @@ export const registry: ManifestItem[] = [
       'use-event-drag',
       'use-event-resize',
       'use-drag-to-create',
+      'use-drag-autoscroll',
     ],
   },
   {
@@ -308,6 +318,7 @@ export const registry: ManifestItem[] = [
       'use-event-drag',
       'use-event-resize',
       'use-drag-to-create',
+      'use-drag-autoscroll',
     ],
   },
   {

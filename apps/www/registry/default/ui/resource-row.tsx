@@ -1,5 +1,6 @@
 'use client'
 
+import { useDragAutoscroll } from '@/registry/default/hooks/use-drag-autoscroll'
 import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
@@ -176,6 +177,7 @@ function Block({
   if (lengthPct <= 0) return null
 
   const isInteracting = moveDrag.isDragging || resizeLeft.isResizing || resizeRight.isResizing
+  useDragAutoscroll({ isActive: isInteracting, ref: blockRef, disableY: true })
 
   const stopAndStart =
     (h: (event: React.PointerEvent<HTMLElement>) => void) =>
@@ -202,14 +204,18 @@ function Block({
         <>
           <div
             onPointerDown={stopAndStart(resizeLeft.handlers.onPointerDown)}
-            className="absolute top-0 bottom-0 left-0 w-1.5 cursor-ew-resize touch-none opacity-0 transition-opacity group-hover/block:opacity-100"
+            className="absolute top-0 bottom-0 left-0 w-2 cursor-ew-resize touch-none"
             aria-label="Resize block start"
-          />
+          >
+            <div className="absolute top-1/2 left-1/2 h-8 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current opacity-0 transition-opacity group-hover/block:opacity-50" />
+          </div>
           <div
             onPointerDown={stopAndStart(resizeRight.handlers.onPointerDown)}
-            className="absolute top-0 right-0 bottom-0 w-1.5 cursor-ew-resize touch-none opacity-0 transition-opacity group-hover/block:opacity-100"
+            className="absolute top-0 right-0 bottom-0 w-2 cursor-ew-resize touch-none"
             aria-label="Resize block end"
-          />
+          >
+            <div className="absolute top-1/2 left-1/2 h-8 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current opacity-0 transition-opacity group-hover/block:opacity-50" />
+          </div>
         </>
       )}
     </div>

@@ -4,6 +4,7 @@ import { format, isSameDay } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
+import { useDragAutoscroll } from '@/registry/default/hooks/use-drag-autoscroll'
 import { useDragToCreate } from '@/registry/default/hooks/use-drag-to-create'
 import { useEventDrag } from '@/registry/default/hooks/use-event-drag'
 import { useEventResize } from '@/registry/default/hooks/use-event-resize'
@@ -379,56 +380,86 @@ function MultiDayEventItem({ event, dayIndex, dayCount, containerRef }: MultiDay
       h(event)
     }
 
+  const showStartSnap = isDragging || resizeTop.isResizing
+  const showEndSnap = resizeBottom.isResizing
+  const liRef = React.useRef<HTMLLIElement>(null)
+  useDragAutoscroll({ isActive: isInteracting, ref: liRef })
+
+  return (
+    <>
+      <li
+        ref={liRef}
+        style={{
+          gridRow: `${rowStart} / span ${rowSpan}`,
+          gridColumnStart: renderedDay + 1,
+        }}
+        className={cn(
+          'relative mt-px flex dark:before:pointer-events-none dark:before:absolute dark:before:inset-1 dark:before:z-0 dark:before:rounded-lg dark:before:bg-background',
+          isInteracting && 'z-30',
+        )}
+      >
+        <Tooltip open={isInteracting ? false : undefined}>
+          <TooltipTrigger asChild>
+            <EventCard
+              color={event.color ?? 'gray'}
+              className={cn(
+                'group/event absolute inset-1 touch-none select-none',
+                onEventMove ? 'cursor-grab' : 'cursor-pointer',
+                isInteracting && 'cursor-grabbing shadow-lg ring-2 ring-primary/60',
+              )}
+              onClick={handleClick}
+              {...handlers}
+            >
+              <EventCard.Title>{event.title}</EventCard.Title>
+              <EventCard.Time>
+                <time dateTime={renderedStart.toISOString()}>{formatTime(renderedStart)}</time>
+              </EventCard.Time>
+              {onEventResize && (
+                <>
+                  <div
+                    onPointerDown={stopAndStart(resizeTop.handlers.onPointerDown)}
+                    className="absolute top-0 right-0 left-0 h-2 cursor-ns-resize touch-none"
+                    aria-label="Resize event start"
+                  >
+                    <div className="absolute top-1/2 left-1/2 h-0.5 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current opacity-0 transition-opacity group-hover/event:opacity-50" />
+                  </div>
+                  <div
+                    onPointerDown={stopAndStart(resizeBottom.handlers.onPointerDown)}
+                    className="absolute right-0 bottom-0 left-0 h-2 cursor-ns-resize touch-none"
+                    aria-label="Resize event end"
+                  >
+                    <div className="absolute top-1/2 left-1/2 h-0.5 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current opacity-0 transition-opacity group-hover/event:opacity-50" />
+                  </div>
+                </>
+              )}
+            </EventCard>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="font-semibold">{event.title}</p>
+            <p className="opacity-80">
+              {formatTime(renderedStart)} – {formatTime(renderedEnd)}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </li>
+      {showStartSnap && <MultiDaySnapLine time={renderedStart} dayCount={dayCount} />}
+      {showEndSnap && <MultiDaySnapLine time={renderedEnd} dayCount={dayCount} />}
+    </>
+  )
+}
+
+function MultiDaySnapLine({ time, dayCount }: { time: Date; dayCount: number }) {
+  const minutes = time.getHours() * 60 + time.getMinutes()
+  const row = Math.floor(minutes / 5) + 2
   return (
     <li
-      style={{
-        gridRow: `${rowStart} / span ${rowSpan}`,
-        gridColumnStart: renderedDay + 1,
-      }}
-      className={cn(
-        'relative mt-px flex dark:before:pointer-events-none dark:before:absolute dark:before:inset-1 dark:before:z-0 dark:before:rounded-lg dark:before:bg-background',
-        isInteracting && 'z-30',
-      )}
+      style={{ gridRow: `${row} / span 1`, gridColumn: `1 / span ${dayCount}` }}
+      className="pointer-events-none relative z-40"
     >
-      <Tooltip open={isInteracting ? false : undefined}>
-        <TooltipTrigger asChild>
-          <EventCard
-            color={event.color ?? 'gray'}
-            className={cn(
-              'group/event absolute inset-1 touch-none select-none',
-              onEventMove ? 'cursor-grab' : 'cursor-pointer',
-              isInteracting && 'cursor-grabbing shadow-lg ring-2 ring-primary/60',
-            )}
-            onClick={handleClick}
-            {...handlers}
-          >
-            <EventCard.Title>{event.title}</EventCard.Title>
-            <EventCard.Time>
-              <time dateTime={renderedStart.toISOString()}>{formatTime(renderedStart)}</time>
-            </EventCard.Time>
-            {onEventResize && (
-              <>
-                <div
-                  onPointerDown={stopAndStart(resizeTop.handlers.onPointerDown)}
-                  className="absolute top-0 right-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
-                  aria-label="Resize event start"
-                />
-                <div
-                  onPointerDown={stopAndStart(resizeBottom.handlers.onPointerDown)}
-                  className="absolute right-0 bottom-0 left-0 h-1.5 cursor-ns-resize touch-none opacity-0 transition-opacity group-hover/event:opacity-100"
-                  aria-label="Resize event end"
-                />
-              </>
-            )}
-          </EventCard>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          <p className="font-semibold">{event.title}</p>
-          <p className="opacity-80">
-            {formatTime(renderedStart)} – {formatTime(renderedEnd)}
-          </p>
-        </TooltipContent>
-      </Tooltip>
+      <div className="absolute inset-x-0 top-0 border-t-2 border-dashed border-primary" />
+      <div className="absolute top-0 -left-14 -translate-y-1/2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold tabular-nums whitespace-nowrap text-primary-foreground">
+        {formatTime(time)}
+      </div>
     </li>
   )
 }

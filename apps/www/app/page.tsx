@@ -20,8 +20,8 @@ export default function HomePage() {
         <PageHeaderHeading>Time-based UI, the way you would have built it.</PageHeaderHeading>
         <PageHeaderDescription>
           A shadcn/ui-style library of day, week, month, and timeline views with drag-to-
-          reschedule, edge resize, and drag-to-create baked in. Copy the source you need,
-          own the code, theme it your way.
+          reschedule, edge resize, and drag-to-create baked in. Copy the source you need, own the
+          code, theme it your way.
         </PageHeaderDescription>
         <PageActions>
           <Link href="/docs/timeline-view" className={buttonVariants()}>
