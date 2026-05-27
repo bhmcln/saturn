@@ -1,9 +1,9 @@
 'use client'
 
-import * as React from 'react'
 import { useNow } from '@/registry/default/hooks/use-now'
 import { dayFraction } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
+import type * as React from 'react'
 
 export interface NowIndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Override the current time. Useful for tests or static showcase. */

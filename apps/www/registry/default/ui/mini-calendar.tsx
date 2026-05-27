@@ -1,8 +1,8 @@
 'use client'
 
-import * as React from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { DayPicker, getDefaultClassNames, type DayButton } from 'react-day-picker'
+import * as React from 'react'
+import { type DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker'
 
 import { cn } from '@/registry/default/lib/utils'
 import { Button, buttonVariants } from '@/registry/default/ui/button'
@@ -65,10 +65,7 @@ export function MiniCalendar({
           'rounded-md bg-accent text-accent-foreground data-[selected=true]:rounded-none',
           defaults.today,
         ),
-        outside: cn(
-          'text-muted-foreground aria-selected:text-muted-foreground',
-          defaults.outside,
-        ),
+        outside: cn('text-muted-foreground aria-selected:text-muted-foreground', defaults.outside),
         disabled: cn('text-muted-foreground opacity-50', defaults.disabled),
         hidden: cn('invisible', defaults.hidden),
         ...classNames,

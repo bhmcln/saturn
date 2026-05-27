@@ -4,7 +4,7 @@ import { addMonths, format, isSameDay, isSameMonth, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
-import { getMonthGrid, type WeekStartsOn } from '@/registry/default/lib/time'
+import { type WeekStartsOn, getMonthGrid } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import type { EventColor } from '@/registry/default/ui/event-card'
 
@@ -58,10 +58,7 @@ function MonthViewRoot({
   children,
   ...props
 }: MonthViewProps) {
-  const monthDays = React.useMemo(
-    () => getMonthGrid(date, { weekStartsOn }),
-    [date, weekStartsOn],
-  )
+  const monthDays = React.useMemo(() => getMonthGrid(date, { weekStartsOn }), [date, weekStartsOn])
   const value = React.useMemo<MonthViewContextValue>(
     () => ({
       date,
@@ -191,10 +188,7 @@ function Grid({ maxEventsPerDay = 3, className }: GridProps) {
 
   return (
     <div
-      className={cn(
-        'grid flex-auto grid-cols-7 grid-rows-6 gap-px bg-border text-xs/6',
-        className,
-      )}
+      className={cn('grid flex-auto grid-cols-7 grid-rows-6 gap-px bg-border text-xs/6', className)}
     >
       {monthDays.map((day) => {
         const dayEvents = events.filter((e) => isSameDay(e.start, day))
@@ -225,32 +219,38 @@ function Grid({ maxEventsPerDay = 3, className }: GridProps) {
               {format(day, 'd')}
             </time>
             <ol className="mt-auto flex flex-col gap-0.5">
-              {visible.map((event) => (
-                <li key={event.id}>
-                  <span
-                    role={onEventClick ? 'button' : undefined}
-                    tabIndex={onEventClick ? 0 : undefined}
-                    onClick={(e) => {
-                      if (onEventClick) {
-                        e.stopPropagation()
-                        onEventClick(event)
-                      }
-                    }}
-                    className="flex items-center gap-1.5 truncate text-foreground hover:underline"
-                  >
+              {visible.map((event) => {
+                const eventColor = event.color ?? 'gray'
+                const inner = (
+                  <>
                     <span
-                      className={cn(
-                        'size-1.5 shrink-0 rounded-full',
-                        EVENT_COLOR_DOT[event.color ?? 'gray'],
-                      )}
+                      className={cn('size-1.5 shrink-0 rounded-full', EVENT_COLOR_DOT[eventColor])}
                     />
                     <span className="truncate">{event.title}</span>
-                  </span>
-                </li>
-              ))}
-              {overflow > 0 && (
-                <li className="text-muted-foreground">+ {overflow} more</li>
-              )}
+                  </>
+                )
+                return (
+                  <li key={event.id}>
+                    {onEventClick ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onEventClick(event)
+                        }}
+                        className="flex w-full items-center gap-1.5 truncate text-left text-foreground hover:underline"
+                      >
+                        {inner}
+                      </button>
+                    ) : (
+                      <span className="flex items-center gap-1.5 truncate text-foreground">
+                        {inner}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+              {overflow > 0 && <li className="text-muted-foreground">+ {overflow} more</li>}
             </ol>
           </button>
         )

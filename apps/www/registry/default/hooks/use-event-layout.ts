@@ -36,7 +36,7 @@ export function layoutEvents<E extends LayoutEvent>(events: E[]): EventLayout<E>
 
   const clusters: E[][] = []
   let current: E[] = []
-  let clusterEnd = -Infinity
+  let clusterEnd = Number.NEGATIVE_INFINITY
 
   for (const evt of sorted) {
     if (current.length === 0 || evt.start.getTime() < clusterEnd) {

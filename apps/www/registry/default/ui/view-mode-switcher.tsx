@@ -1,9 +1,9 @@
 'use client'
 
-import * as React from 'react'
+import { cn } from '@/registry/default/lib/utils'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { Check, ChevronDown } from 'lucide-react'
-import { cn } from '@/registry/default/lib/utils'
+import * as React from 'react'
 
 export type ViewMode = 'day' | 'week' | 'month' | 'agenda' | 'timeline' | (string & {})
 

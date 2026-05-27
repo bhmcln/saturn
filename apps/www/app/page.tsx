@@ -1,13 +1,13 @@
 import { Announcement } from '@/components/announcement'
-import { buttonVariants } from '@/registry/default/ui/button'
 import { CodeBlock } from '@/components/code-block'
-import { WeekViewDemo } from '@/components/demos/week-view-demo'
+import { CalendarDemo } from '@/components/demos/calendar-demo'
 import {
   PageActions,
   PageHeader,
   PageHeaderDescription,
   PageHeaderHeading,
 } from '@/components/page-header'
+import { buttonVariants } from '@/registry/default/ui/button'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -39,8 +39,8 @@ export default function HomePage() {
 
       <section className="container py-10">
         <div className="overflow-hidden rounded-xl border bg-card">
-          <div className="h-[560px]">
-            <WeekViewDemo />
+          <div className="h-[640px]">
+            <CalendarDemo />
           </div>
         </div>
       </section>

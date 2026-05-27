@@ -1,9 +1,9 @@
 'use client'
 
-import * as React from 'react'
 import * as Popover from '@radix-ui/react-popover'
 import { format } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
+import * as React from 'react'
 import type { DateRange } from 'react-day-picker'
 
 import { useControllableState } from '@/registry/default/hooks/use-controllable'

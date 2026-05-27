@@ -6,12 +6,7 @@ import * as React from 'react'
 
 import { useEventLayout } from '@/registry/default/hooks/use-event-layout'
 import { useNow } from '@/registry/default/hooks/use-now'
-import {
-  addDays,
-  eachHourOfDay,
-  formatHour,
-  formatTime,
-} from '@/registry/default/lib/time'
+import { addDays, eachHourOfDay, formatHour, formatTime } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { EventCard, type EventColor } from '@/registry/default/ui/event-card'
 
