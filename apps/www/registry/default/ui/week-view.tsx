@@ -4,16 +4,11 @@ import { format, isSameDay, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 
-import {
-  type WeekStartsOn,
-  addDays,
-  eachHourOfDay,
-  formatHour,
-  formatTime,
-  getWeekDays,
-} from '@/registry/default/lib/time'
+import { type WeekStartsOn, addDays, formatTime, getWeekDays } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
+import { DayLabels as DayLabelsPrimitive } from '@/registry/default/ui/day-labels'
 import { EventCard, type EventColor } from '@/registry/default/ui/event-card'
+import { TimeGutter } from '@/registry/default/ui/time-gutter'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/default/ui/tooltip'
 
 export interface CalendarEvent {
@@ -148,37 +143,7 @@ function Body({ className, children, ...props }: React.HTMLAttributes<HTMLDivEle
 
 function DayLabels({ className }: { className?: string }) {
   const { weekDays } = useWeekView()
-  return (
-    <div
-      className={cn(
-        'sticky top-0 z-30 flex-none bg-background shadow-sm ring-1 ring-border sm:pr-8',
-        className,
-      )}
-    >
-      <div className="-mr-px hidden grid-cols-7 divide-x divide-border border-r text-sm/6 text-muted-foreground sm:grid">
-        <div className="col-end-1 w-14" />
-        {weekDays.map((day) => {
-          const today = isToday(day)
-          return (
-            <div key={day.toISOString()} className="flex items-center justify-center py-3">
-              <span className={cn(today && 'flex items-baseline')}>
-                {format(day, 'EEE')}{' '}
-                <span
-                  className={cn(
-                    today
-                      ? 'ml-1.5 flex size-8 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground'
-                      : 'items-center justify-center font-semibold text-foreground',
-                  )}
-                >
-                  {format(day, 'd')}
-                </span>
-              </span>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
+  return <DayLabelsPrimitive days={weekDays} className={className} />
 }
 
 /**
@@ -193,11 +158,10 @@ function Grid({
   children?: (event: CalendarEvent) => React.ReactNode
 }) {
   const { date, weekDays } = useWeekView()
-  const hours = React.useMemo(() => eachHourOfDay(date), [date])
 
   return (
     <div className={cn('flex flex-auto', className)}>
-      <div className="sticky left-0 z-10 w-14 flex-none bg-background ring-1 ring-border" />
+      <TimeGutter date={date} />
       <div className="grid flex-auto grid-cols-1 grid-rows-1">
         {/* Horizontal hour lines */}
         <div
@@ -205,15 +169,9 @@ function Grid({
           className="col-start-1 col-end-2 row-start-1 grid divide-y divide-border"
         >
           <div className="row-end-1 h-7" />
-          {hours.map((hour) => (
-            <React.Fragment key={hour.getHours()}>
-              <div>
-                <div className="sticky left-0 z-20 -mt-2.5 -ml-14 w-14 pr-2 text-right text-xs/5 text-muted-foreground">
-                  {formatHour(hour)}
-                </div>
-              </div>
-              <div />
-            </React.Fragment>
+          {Array.from({ length: 48 }, (_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: stable 48-row grid
+            <div key={i} />
           ))}
         </div>
 

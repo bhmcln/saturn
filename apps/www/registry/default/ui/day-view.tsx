@@ -6,9 +6,10 @@ import * as React from 'react'
 
 import { useEventLayout } from '@/registry/default/hooks/use-event-layout'
 import { useNow } from '@/registry/default/hooks/use-now'
-import { addDays, eachHourOfDay, formatHour, formatTime } from '@/registry/default/lib/time'
+import { addDays, formatTime } from '@/registry/default/lib/time'
 import { cn } from '@/registry/default/lib/utils'
 import { EventCard, type EventColor } from '@/registry/default/ui/event-card'
+import { TimeGutter } from '@/registry/default/ui/time-gutter'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/default/ui/tooltip'
 
 export interface CalendarEvent {
@@ -159,13 +160,12 @@ function NowLine() {
 
 function Grid({ className }: { className?: string }) {
   const { date, dayEvents, onEventClick } = useDayView()
-  const hours = React.useMemo(() => eachHourOfDay(date), [date])
   const layout = useEventLayout(dayEvents)
   const showsToday = isToday(date)
 
   return (
     <div className={cn('flex flex-auto', className)}>
-      <div className="sticky left-0 z-10 w-14 flex-none bg-background ring-1 ring-border" />
+      <TimeGutter date={date} />
       <div className="grid flex-auto grid-cols-1 grid-rows-1">
         {/* Horizontal hour lines */}
         <div
@@ -173,15 +173,9 @@ function Grid({ className }: { className?: string }) {
           className="col-start-1 col-end-2 row-start-1 grid divide-y divide-border"
         >
           <div className="row-end-1 h-7" />
-          {hours.map((hour) => (
-            <React.Fragment key={hour.getHours()}>
-              <div>
-                <div className="sticky left-0 z-20 -mt-2.5 -ml-14 w-14 pr-2 text-right text-xs/5 text-muted-foreground">
-                  {formatHour(hour)}
-                </div>
-              </div>
-              <div />
-            </React.Fragment>
+          {Array.from({ length: 48 }, (_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: stable 48-row grid
+            <div key={i} />
           ))}
         </div>
 

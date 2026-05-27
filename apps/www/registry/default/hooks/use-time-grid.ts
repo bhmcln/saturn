@@ -49,10 +49,7 @@ export interface UseTimeGridReturn {
  * viewport bounds. Pass one of these to a TimelineView so every event in
  * its body uses the same coordinate space without recomputing it per item.
  */
-export function useTimeGrid({
-  viewportStart,
-  viewportEnd,
-}: UseTimeGridOptions): UseTimeGridReturn {
+export function useTimeGrid({ viewportStart, viewportEnd }: UseTimeGridOptions): UseTimeGridReturn {
   return React.useMemo(
     () => ({
       position: (start, end) => positionRange(start, end, viewportStart, viewportEnd),

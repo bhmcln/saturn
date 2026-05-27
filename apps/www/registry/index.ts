@@ -103,6 +103,21 @@ export const registry: ManifestItem[] = [
     dependencies: ['@radix-ui/react-tooltip'],
     registryDependencies: ['utils'],
   },
+  {
+    name: 'time-gutter',
+    type: 'registry:ui',
+    description: 'Sticky-left column of hour labels for vertical-time views',
+    files: [{ path: 'ui/time-gutter.tsx', type: 'registry:ui' }],
+    registryDependencies: ['utils', 'time'],
+  },
+  {
+    name: 'day-labels',
+    type: 'registry:ui',
+    description: 'Sticky-top row of day-of-week + day-of-month labels with today pill',
+    files: [{ path: 'ui/day-labels.tsx', type: 'registry:ui' }],
+    dependencies: ['date-fns'],
+    registryDependencies: ['utils'],
+  },
 
   // ─── Views (ui) ─────────────────────────────────────────────────────────
   {
@@ -111,7 +126,14 @@ export const registry: ManifestItem[] = [
     description: 'Seven-day calendar view with time grid and positioned events',
     files: [{ path: 'ui/week-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: ['utils', 'time', 'event-card', 'tooltip'],
+    registryDependencies: [
+      'utils',
+      'time',
+      'event-card',
+      'tooltip',
+      'time-gutter',
+      'day-labels',
+    ],
   },
   {
     name: 'day-view',
@@ -119,7 +141,15 @@ export const registry: ManifestItem[] = [
     description: 'Single-day calendar grid with positioned events and a now-line',
     files: [{ path: 'ui/day-view.tsx', type: 'registry:ui' }],
     dependencies: ['date-fns', 'lucide-react'],
-    registryDependencies: ['utils', 'time', 'event-card', 'tooltip', 'use-event-layout', 'use-now'],
+    registryDependencies: [
+      'utils',
+      'time',
+      'event-card',
+      'tooltip',
+      'time-gutter',
+      'use-event-layout',
+      'use-now',
+    ],
   },
   {
     name: 'month-view',

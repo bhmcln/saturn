@@ -5,13 +5,7 @@
  * bar / text without rebuilding the palette each time.
  */
 
-export type ActivityType =
-  | 'TASK'
-  | 'TRAVEL'
-  | 'BREAK'
-  | 'TRAINING'
-  | 'ADMIN'
-  | 'UNAVAILABLE'
+export type ActivityType = 'TASK' | 'TRAVEL' | 'BREAK' | 'TRAINING' | 'ADMIN' | 'UNAVAILABLE'
 
 export interface ActivityColorSet {
   /** Background class for the block itself. */
