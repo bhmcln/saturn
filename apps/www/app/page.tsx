@@ -1,5 +1,5 @@
 import { Announcement } from '@/components/announcement'
-import { buttonVariants } from '@/components/button'
+import { buttonVariants } from '@/registry/default/ui/button'
 import { CodeBlock } from '@/components/code-block'
 import { WeekViewDemo } from '@/components/demos/week-view-demo'
 import {
